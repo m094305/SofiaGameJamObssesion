@@ -8,53 +8,51 @@ public class ArcadeButtons : MonoBehaviour
     public InputActionReference buttonB;
     public InputActionReference buttonC;
 
-    private string message = "";
+    private PlayerInventory inventory;
+
+    void Awake()
+    {
+        inventory = GetComponent<PlayerInventory>();
+    }
 
     void OnEnable()
     {
-        buttonA.action.Enable();
-        buttonB.action.Enable();
-        buttonC.action.Enable();
+        if (buttonA != null) buttonA.action.Enable();
+        if (buttonB != null) buttonB.action.Enable();
+        if (buttonC != null) buttonC.action.Enable();
     }
 
     void OnDisable()
     {
-        buttonA.action.Disable();
-        buttonB.action.Disable();
-        buttonC.action.Disable();
+        if (buttonA != null) buttonA.action.Disable();
+        if (buttonB != null) buttonB.action.Disable();
+        if (buttonC != null) buttonC.action.Disable();
     }
 
     void Update()
     {
-        if (buttonA.action.WasPressedThisFrame())
+        if (inventory == null)
+            return;
+
+        // A - Pick up
+        if (buttonA != null &&
+            buttonA.action.WasPressedThisFrame())
         {
-            message = "A - Interact / Pick up";
-            Debug.Log(message);
+            inventory.TryPickup();
         }
 
-        if (buttonB.action.WasPressedThisFrame())
+        // B - Throw
+        if (buttonB != null &&
+            buttonB.action.WasPressedThisFrame())
         {
-            message = "B - Attack / Throw";
-            Debug.Log(message);
+            inventory.TryThrow();
         }
 
-        if (buttonC.action.WasPressedThisFrame())
+        // C - Inventory
+        if (buttonC != null &&
+            buttonC.action.WasPressedThisFrame())
         {
-            message = "C - Inventory";
-            Debug.Log(message);
+            inventory.ToggleInventory();
         }
-    }
-
-    void OnGUI()
-    {
-        GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = 30;
-        style.normal.textColor = Color.white;
-
-        GUI.Label(
-            new Rect(20, 20, 500, 60),
-            message,
-            style
-        );
     }
 }
