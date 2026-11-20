@@ -4,58 +4,55 @@ using System.Collections;
 
 public class PlayerInventory : MonoBehaviour
 {
-    [Header("Throwable Item")]
     public Transform throwableItem;
 
-    [Header("Settings")]
     public float pickupRange = 1.5f;
     public float throwDistance = 3f;
     public float throwSpeed = 8f;
-    public float itemRadius = 0.2f;
-
-    public LayerMask wallLayer;
+    public float itemRadius = 0.25f;
 
     private bool hasItem = false;
     private bool isFlying = false;
     private bool inventoryOpen = false;
 
     private Vector2 facingDirection = Vector2.down;
-    private Vector3 previousPosition;
+    private Vector2 previousPosition;
+
+    private int wallMask;
 
     void Start()
     {
         previousPosition = transform.position;
+
+        // Automatically find the Walls layer
+        wallMask = LayerMask.GetMask("Walls");
+
+        if (wallMask == 0)
+        {
+            Debug.LogError(
+                "Walls layer does not exist! Create it in Unity."
+            );
+        }
     }
 
     void LateUpdate()
     {
-        // Remember which direction the player last moved.
-        Vector2 movement = transform.position - previousPosition;
+        // Remember the last movement direction
+        Vector2 currentPosition = transform.position;
+        Vector2 movement = currentPosition - previousPosition;
 
         if (movement.sqrMagnitude > 0.00001f)
         {
             facingDirection = movement.normalized;
         }
 
-        previousPosition = transform.position;
+        previousPosition = currentPosition;
     }
 
     // BUTTON A - PICK UP
     public void TryPickup()
     {
-        if (hasItem)
-        {
-            Debug.Log("Inventory is full!");
-            return;
-        }
-
-        if (throwableItem == null)
-        {
-            Debug.LogWarning("No throwable item assigned!");
-            return;
-        }
-
-        if (isFlying)
+        if (hasItem || isFlying || throwableItem == null)
             return;
 
         float distance = Vector2.Distance(
@@ -66,24 +63,24 @@ public class PlayerInventory : MonoBehaviour
         if (distance <= pickupRange)
         {
             hasItem = true;
-
-            // Hide the item while it is in inventory.
             throwableItem.gameObject.SetActive(false);
 
             Debug.Log("Item picked up!");
         }
         else
         {
-            Debug.Log("Move closer to the item!");
+            Debug.Log("Move closer!");
         }
     }
 
     // BUTTON B - THROW
     public void TryThrow()
     {
-        if (!hasItem || isFlying)
+        Debug.Log("Throw button pressed!");
+
+        if (!hasItem || isFlying || throwableItem == null)
         {
-            Debug.Log("You have no item to throw!");
+            Debug.Log("Cannot throw - no item available!");
             return;
         }
 
@@ -95,54 +92,65 @@ public class PlayerInventory : MonoBehaviour
         hasItem = false;
         isFlying = true;
 
-        Vector2 startPosition = transform.position;
-
-        // Throw in the player's last movement direction.
-        Vector2 direction = facingDirection;
-
-        // Check whether a wall is in the way.
-        RaycastHit2D hit = Physics2D.CircleCast(
-            startPosition,
-            itemRadius,
-            direction,
-            throwDistance,
-            wallLayer
-        );
+        Vector2 start = transform.position;
+        Vector2 direction = facingDirection.normalized;
 
         float distance = throwDistance;
 
+        // Check the entire path before throwing
+        RaycastHit2D hit = Physics2D.CircleCast(
+            start,
+            itemRadius,
+            direction,
+            throwDistance,
+            wallMask
+        );
+
         if (hit.collider != null)
         {
-            distance = Mathf.Max(0f, hit.distance - 0.05f);
+            // Stop before the wall
+            distance = Mathf.Max(
+                0f,
+                hit.distance - 0.02f
+            );
+
+            Debug.Log(
+                "WALL DETECTED: " + hit.collider.name
+            );
+        }
+        else
+        {
+            Debug.Log(
+                "NO WALL DETECTED in the throwing path."
+            );
         }
 
-        Vector2 targetPosition =
-            startPosition + direction * distance;
+        Vector2 target = start + direction * distance;
 
-        // Make the item visible again.
+        // Make the item visible
+        throwableItem.position = start;
         throwableItem.gameObject.SetActive(true);
 
-        throwableItem.position = startPosition;
-
-        // Move the item toward the target.
+        // Move to the stopping position
         while (Vector2.Distance(
             throwableItem.position,
-            targetPosition) > 0.01f)
+            target
+        ) > 0.01f)
         {
             throwableItem.position = Vector2.MoveTowards(
                 throwableItem.position,
-                targetPosition,
+                target,
                 throwSpeed * Time.deltaTime
             );
 
             yield return null;
         }
 
-        throwableItem.position = targetPosition;
+        throwableItem.position = target;
 
         isFlying = false;
 
-        Debug.Log("Item thrown! You can pick it up again.");
+        Debug.Log("Item landed!");
     }
 
     // BUTTON C - INVENTORY
@@ -156,13 +164,10 @@ public class PlayerInventory : MonoBehaviour
         if (!inventoryOpen)
             return;
 
-        string inventoryText = hasItem
+        string text = hasItem
             ? "Inventory: Throwable Item x1"
             : "Inventory: Empty";
 
-        GUI.Box(
-            new Rect(20, 20, 280, 100),
-            inventoryText
-        );
+        GUI.Box(new Rect(20, 20, 280, 100), text);
     }
 }
