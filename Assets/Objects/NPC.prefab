@@ -284,6 +284,15 @@ MonoBehaviour:
   - {fileID: 0}
   patrolSpeed: 1.5
   waypointDistance: 0.2
+  useMiddlePoints: 0
+  strayRadius: 0.5
+  weaveAmount: 0.2
+  weaveSpeed: 1.2
+  walkLength: {x: 1, y: 1}
+  keepDirectionChance: 0.65
+  pauseAtPoint: {x: 0.2, y: 0.8}
+  lookAhead: 0.8
+  wallCheckRadius: 0.25
   chaseSpeed: 3
   losePlayerAfter: 1
   visionDistance: 4
@@ -296,6 +305,7 @@ MonoBehaviour:
   attackStopDistance: 1.1
   punchDamage: 20
   punchDelay: 0.5
+  interactionDistance: 1.5
   npcVisual: {fileID: 1208867076444235928}
   spriteRotationOffset: 0
 --- !u!114 &8309066416985269477
