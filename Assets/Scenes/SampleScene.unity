@@ -441,11 +441,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &177455458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -553,26 +553,26 @@ MonoBehaviour:
   spottedLines:
   - characterName: Narcissus
     line: Silk, a purple one at that. Something I wouldn't mind to Me to add. For my spark it will contribute.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   greetingLines:
   - characterName: Merchant
     line: Hey fellow traveller. Looking to buy something for the journey ahead?
-    side: 1
+    side: 0
     portraitOverride: {fileID: 0}
   attackedLines: []
   deathLines:
   - characterName: Merchant
     line: The grace of Cephissus... Your beauty will be your demise!
-    side: 1
+    side: 0
     portraitOverride: {fileID: 0}
   - characterName: Narcissus
     line: Such bristly fabric. It will surely sit fine upon my clavicles, the finest ones there are. Long promised treasure I have retrieved, promised by the gods upon My birth.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   - characterName: Narcissus
     line: Oh would you look at that. A fine metal sitting upon the wrong body. It will surely be befitting of Me to appropriate it.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
 --- !u!1 &214396748
 GameObject:
@@ -1144,11 +1144,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &481124229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1589,11 +1589,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2005684744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &609617165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1818,11 +1818,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &667303381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2404,11 +2404,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &852447048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40054,11 +40054,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &1114511885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40207,11 +40207,11 @@ RectTransform:
   - {fileID: 933803558}
   m_Father: {fileID: 2005684744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.26, y: 0}
+  m_AnchorMax: {x: 0.26, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.841, y: 0}
 --- !u!114 &1182618812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40433,11 +40433,11 @@ RectTransform:
   - {fileID: 688426052}
   m_Father: {fileID: 2005684744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.127, y: 0}
 --- !u!114 &1391531847
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42426,11 +42426,11 @@ MonoBehaviour:
   spottedLines:
   - characterName: Narcissus
     line: Such shame it is for the elderly. Doing such futile attempts for relevance, to keep up, even with the sparkle on her hands... Shame, it is not on Me.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   - characterName: Narcissus
     line: Those rings, on fingers withered by age. Those rings are too brilliant for her.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   greetingLines:
   - characterName: Grandma
@@ -42441,7 +42441,7 @@ MonoBehaviour:
   deathLines:
   - characterName: Narcissus
     line: For a hag with gold, her life wasn't worth much. For those rings though, life has plans including Me. Such closure must be for them, to be Mine.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
 --- !u!1 &1600013755
 GameObject:
@@ -42528,11 +42528,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!1 &1620811236
 GameObject:
   m_ObjectHideFlags: 0
@@ -42964,11 +42964,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &1751131853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43351,30 +43351,30 @@ MonoBehaviour:
   spottedLines:
   - characterName: Narcissus
     line: A golden shrine to a human. Shrine, too good for it to not be to Me. So brilliant and clean, with Me it will be sublime.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   greetingLines:
   - characterName: Knight
     line: Hello fellow! In your place I would be more careful around these woods, good idea don't you think?
-    side: 1
+    side: 0
     portraitOverride: {fileID: 0}
   attackedLines:
   - characterName: Knight
     line: Coward art thou. The use of foul trickery for what? God shall serve its justice upon you.
-    side: 1
+    side: 0
     portraitOverride: {fileID: 0}
   - characterName: Narcissus
     line: Filth thou art.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   deathLines:
   - characterName: Narcissus
     line: Such a beauty of purpose, to make Me glamor. Shame it is not the finest jewel, barely suffices.
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
   - characterName: Narcissus
     line: So good it is to be Me. The body of a god, all of Me!
-    side: 0
+    side: 1
     portraitOverride: {fileID: 0}
 --- !u!1 &1942747048
 GameObject:
@@ -43441,11 +43441,11 @@ RectTransform:
   - {fileID: 1523758972}
   m_Father: {fileID: 2005684744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.26, y: 0}
+  m_AnchorMax: {x: 0.26, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.555, y: 0}
 --- !u!114 &1953607742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43562,11 +43562,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 445358626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.95}
+  m_AnchorMin: {x: 0.74, y: 0}
+  m_AnchorMax: {x: 0.74, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.338, y: 0}
 --- !u!114 &1964145046
 MonoBehaviour:
   m_ObjectHideFlags: 0
