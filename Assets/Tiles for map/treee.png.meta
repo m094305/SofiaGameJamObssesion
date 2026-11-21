@@ -1,16 +1,13 @@
 fileFormatVersion: 2
-guid: f714b1b308c8b2f4f916969e787c3808
+guid: 58458876626a11e479e4e99addf813ec
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2260974765022217452
-    second: grasssutff_0
+      213: -5936287772624931514
+    second: treee_0
   - first:
-      213: 2841814198237729648
-    second: grasssutff_1
-  - first:
-      213: 3050668343998777686
-    second: grasssutff_2
+      213: -6046379319132840054
+    second: treee_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -83,7 +80,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -104,71 +101,62 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: grasssutff_0
+      name: treee_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 254
-        width: 130
-        height: 130
+        x: 53
+        y: 0
+        width: 275
+        height: 355
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 34, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ce48543d198906f10800000000000000
-      internalID: 2260974765022217452
+      spriteID: 645323cf8b11e9da0800000000000000
+      internalID: -5936287772624931514
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: grasssutff_1
+      name: treee_1
       rect:
         serializedVersion: 2
-        x: 125
-        y: 6
-        width: 259
-        height: 252
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0731f9be4f6207720800000000000000
-      internalID: 2841814198237729648
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: grasssutff_2
-      rect:
-        serializedVersion: 2
-        x: 237
-        y: 249
+        x: 178
+        y: 345
         width: 6
         height: 9
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 659839b12b6265a20800000000000000
-      internalID: 3050668343998777686
+      spriteID: a8f91d95b02f61ca0800000000000000
+      internalID: -6046379319132840054
       vertices: []
       indices: 
       edges: []
@@ -177,7 +165,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c4a404896ca390248bc39cb3f0d5045b
     internalID: 0
     vertices: []
     indices: 
@@ -187,9 +175,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      grasssutff_0: 2260974765022217452
-      grasssutff_1: 2841814198237729648
-      grasssutff_2: 3050668343998777686
+      treee_0: -5936287772624931514
+      treee_1: -6046379319132840054
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
