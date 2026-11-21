@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 08ecef3297851184d953162cfb105172
+guid: 5e2378420034e5146a0259bae885a197
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -98,6 +98,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -105,13 +118,13 @@ TextureImporter:
       name: water_0
       rect:
         serializedVersion: 2
-        x: 127
+        x: 0
         y: 0
-        width: 129
+        width: 256
         height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 128, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -127,7 +140,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c7f903dc233fa99498ff84b180d65750
     internalID: 0
     vertices: []
     indices: 

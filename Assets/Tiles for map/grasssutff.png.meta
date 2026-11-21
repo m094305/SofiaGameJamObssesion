@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: c9174b93a584afa4e8d81834d728973a
+guid: f714b1b308c8b2f4f916969e787c3808
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6808007654049211306
-    second: water-export_0
+      213: 2260974765022217452
+    second: grasssutff_0
+  - first:
+      213: 2841814198237729648
+    second: grasssutff_1
+  - first:
+      213: 3050668343998777686
+    second: grasssutff_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 128
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -77,7 +83,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -98,17 +104,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: water-export_0
+      name: grasssutff_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 256
-        height: 128
+        y: 254
+        width: 130
+        height: 130
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -117,8 +136,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aa36eb714e6ea7e50800000000000000
-      internalID: 6808007654049211306
+      spriteID: ce48543d198906f10800000000000000
+      internalID: 2260974765022217452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grasssutff_1
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 6
+        width: 259
+        height: 252
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0731f9be4f6207720800000000000000
+      internalID: 2841814198237729648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grasssutff_2
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 249
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 659839b12b6265a20800000000000000
+      internalID: 3050668343998777686
       vertices: []
       indices: 
       edges: []
@@ -137,7 +200,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      water-export_0: 6808007654049211306
+      grasssutff_0: 2260974765022217452
+      grasssutff_1: 2841814198237729648
+      grasssutff_2: 3050668343998777686
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
