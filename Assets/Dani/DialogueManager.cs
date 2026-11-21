@@ -39,6 +39,10 @@ public class DialogueManager : MonoBehaviour
     private bool isDialogueActive;
     private bool isTyping;
 
+    // Read-only, so other scripts (e.g. NPCGuard) can hide their prompts while someone is talking.
+    public bool IsDialogueActive => isDialogueActive;
+    public static bool AnyDialogueActive => Instance != null && Instance.isDialogueActive;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

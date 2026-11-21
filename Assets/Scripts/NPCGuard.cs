@@ -40,8 +40,13 @@ public class NPCGuard : MonoBehaviour
     public float losePlayerAfter = 2f;
 
     [Header("Vision")]
-    public float visionDistance = 4f;
-    [Range(10f, 160f)] public float visionAngle = 70f;
+    [Tooltip("How far the NPC sees straight ahead.")]
+    public float visionDistance = 7f;
+    [Tooltip("Width of the main (long-range) sight cone.")]
+    [Range(10f, 160f)] public float visionAngle = 90f;
+    [Tooltip("Peripheral vision: a wider, shorter-range view around the NPC.")]
+    public float peripheralDistance = 3f;
+    [Range(90f, 360f)] public float peripheralAngle = 240f;
     public Transform visionCone;
     public LayerMask wallLayer;
 
@@ -57,6 +62,14 @@ public class NPCGuard : MonoBehaviour
     [Header("NPC Visual")]
     public Transform npcVisual;
     public float spriteRotationOffset = 0f;
+    [Tooltip("Rotate the visual to face the walking direction. Leave off for NPCs with " +
+             "front/back/side sprite frames (NPCSpriteAnimator picks the frame instead).")]
+    public bool rotateVisual = false;
+
+    [Header("Sees You Indicator")]
+    [Tooltip("Show a red \"!\" over the NPC's head while it can see the player.")]
+    public bool showSeesYouIcon = true;
+    public float seesYouIconHeight = 1.0f;
 
     private Rigidbody2D rb;
     private PlayerHealth playerHealth;
@@ -99,10 +112,45 @@ public class NPCGuard : MonoBehaviour
 
         if (punchHitbox == null)
             Debug.LogWarning(name + ": Punch Hitbox is not assigned.");
+
+        if (showSeesYouIcon)
+            CreateSeesYouIcon();
+    }
+
+    // ---- "!" over the head while this NPC can see the player ----
+
+    private GameObject seesYouIcon;
+
+    void CreateSeesYouIcon()
+    {
+        seesYouIcon = new GameObject("Sees You Icon");
+        seesYouIcon.transform.SetParent(transform, false);
+        seesYouIcon.transform.localPosition = new Vector3(0f, seesYouIconHeight, 0f);
+        var text = seesYouIcon.AddComponent<TMPro.TextMeshPro>();
+        text.text = "!";
+        text.fontSize = 7f;
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
+        text.color = new Color(1f, 0.25f, 0.2f);
+        text.outlineWidth = 0.25f;
+        text.outlineColor = Color.black;
+        text.sortingOrder = 50;
+        text.rectTransform.sizeDelta = new Vector2(1f, 1f);
+        seesYouIcon.SetActive(false);
+    }
+
+    void UpdateSeesYouIcon()
+    {
+        if (seesYouIcon == null) return;
+        bool sees = CanSeePlayerNow();
+        if (seesYouIcon.activeSelf != sees)
+            seesYouIcon.SetActive(sees);
     }
 
     void Update()
     {
+        UpdateSeesYouIcon();
+
         if (!CanInteract())
         {
             interacted = false;
@@ -115,6 +163,15 @@ public class NPCGuard : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Everyone stands still while a conversation is on screen.
+        if (DialogueManager.AnyDialogueActive)
+        {
+            rb.linearVelocity = Vector2.zero;
+            stuckCheckTime = Time.time;     // don't count the pause as being stuck
+            lastSeenTime = Time.time;       // and don't lose the player during it
+            return;
+        }
+
         // A peaceful NPC only patrols; spotting the player does not start combat.
         if (!isHostile)
         {
@@ -384,16 +441,26 @@ public class NPCGuard : MonoBehaviour
         Vector2 target = playerCollider.bounds.center;
         Vector2 toPlayer = target - origin;
 
-        if (toPlayer.magnitude > visionDistance)
-            return false;
-
         Vector2 facing = visionCone != null
             ? (Vector2)visionCone.up
             : Vector2.up;
 
-        if (toPlayer.sqrMagnitude > 0.0001f &&
-            Vector2.Angle(facing, toPlayer) > visionAngle * 0.5f)
+        // Main sight: long range, in front.
+        bool inMainCone = toPlayer.magnitude <= visionDistance &&
+            (toPlayer.sqrMagnitude < 0.0001f ||
+             Vector2.Angle(facing, toPlayer) <= visionAngle * 0.5f);
+
+        // Peripheral sight: shorter range, much wider (measured from the NPC's body).
+        Vector2 fromBody = target - rb.position;
+        bool inPeripheral = fromBody.magnitude <= peripheralDistance &&
+            (fromBody.sqrMagnitude < 0.0001f ||
+             Vector2.Angle(facing, fromBody) <= peripheralAngle * 0.5f);
+
+        if (!inMainCone && !inPeripheral)
             return false;
+
+        if (inPeripheral && !inMainCone)
+            origin = rb.position;
 
         if (wallLayer.value != 0 &&
             Physics2D.Linecast(origin, target, wallLayer).collider != null)
@@ -435,9 +502,16 @@ public class NPCGuard : MonoBehaviour
 
     bool CanInteract()
     {
+        // No interact prompt (or E-to-interact) while a conversation is on screen;
+        // E belongs to the dialogue then.
+        if (DialogueManager.AnyDialogueActive)
+            return false;
+
+        // Only when close AND the NPC can see you.
         return !isHostile && player != null &&
             (playerHealth == null || !playerHealth.IsDead) &&
-            Vector2.Distance(transform.position, player.position) <= interactionDistance;
+            Vector2.Distance(transform.position, player.position) <= interactionDistance &&
+            CanSeePlayerNow();
     }
 
     void Interact()
@@ -485,13 +559,39 @@ public class NPCGuard : MonoBehaviour
         if (punchHitbox != null)
             punchHitbox.transform.localRotation = rotation;
 
-        if (npcVisual != null)
+        if (npcVisual != null && rotateVisual)
             npcVisual.localRotation = Quaternion.Euler(0f, 0f,
                 angle + spriteRotationOffset);
     }
 
+    // Sight areas: red = main cone, orange = peripheral.
+    void DrawVisionGizmos()
+    {
+        Vector3 facing = visionCone != null ? visionCone.up : Vector3.up;
+        Vector3 coneOrigin = visionCone != null ? visionCone.position : transform.position;
+        DrawArc(coneOrigin, facing, visionAngle, visionDistance, new Color(1f, 0.2f, 0.2f, 0.8f));
+        DrawArc(transform.position, facing, peripheralAngle, peripheralDistance, new Color(1f, 0.6f, 0.1f, 0.8f));
+    }
+
+    static void DrawArc(Vector3 origin, Vector3 facing, float angle, float radius, Color color)
+    {
+        Gizmos.color = color;
+        int steps = Mathf.Max(6, Mathf.CeilToInt(angle / 10f));
+        Vector3 prev = origin;
+        for (int i = 0; i <= steps; i++)
+        {
+            float a = -angle * 0.5f + angle * i / steps;
+            Vector3 p = origin + Quaternion.Euler(0f, 0f, a) * facing * radius;
+            Gizmos.DrawLine(prev, p);
+            prev = p;
+        }
+        if (angle < 360f) Gizmos.DrawLine(prev, origin);
+    }
+
     void OnDrawGizmosSelected()
     {
+        DrawVisionGizmos();
+
         if (patrolPoints == null || patrolPoints.Length == 0)
             return;
 

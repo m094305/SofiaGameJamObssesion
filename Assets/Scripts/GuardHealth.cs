@@ -31,14 +31,21 @@ public class GuardHealth : MonoBehaviour
 
         Debug.Log(name + " HP: " + currentHealth);
 
+        NPCDialogue dialogue = guard != null
+            ? guard.GetComponent<NPCDialogue>()
+            : GetComponent<NPCDialogue>();
+
         if (currentHealth <= 0)
         {
             Debug.Log(name + (stealthHit ? ": Stealth takedown!" : ": Defeated!"));
+            // Queue the death lines before the NPC is switched off.
+            if (dialogue != null) dialogue.OnKilled();
             // Disable the NPC root even when GuardHealth is attached to a child.
             (guard != null ? guard.gameObject : gameObject).SetActive(false);
         }
         else if (guard != null)
         {
+            if (dialogue != null) dialogue.OnAttacked();
             guard.BecomeHostile();
         }
     }
