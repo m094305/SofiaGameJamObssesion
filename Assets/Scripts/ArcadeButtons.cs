@@ -12,7 +12,10 @@ public class ArcadeButtons : MonoBehaviour
 
     void Awake()
     {
-        inventory = GetComponent<PlayerInventory>();
+        inventory = GetComponentInChildren<PlayerInventory>(true);
+
+        if (inventory == null)
+            Debug.LogError("PlayerInventory child not found!");
     }
 
     void OnEnable()
@@ -34,21 +37,21 @@ public class ArcadeButtons : MonoBehaviour
         if (inventory == null)
             return;
 
-        // A - Pick up
+        // A - PICK UP / SWITCH
         if (buttonA != null &&
             buttonA.action.WasPressedThisFrame())
         {
             inventory.TryPickup();
         }
 
-        // B - Throw
+        // B - THROW / MELEE ATTACK
         if (buttonB != null &&
             buttonB.action.WasPressedThisFrame())
         {
             inventory.TryThrow();
         }
 
-        // C - Inventory
+        // C - INVENTORY
         if (buttonC != null &&
             buttonC.action.WasPressedThisFrame())
         {
