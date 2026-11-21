@@ -63,24 +63,30 @@ public class PlayerMovement : MonoBehaviour
         if (animator == null)
             return;
 
+        if (movement == Vector2.zero)
+        {
+            // Keep the last Walk bool active and pause on that direction's frame
+            animator.speed = 0f;
+            return;
+        }
+
+        animator.speed = 1f;
+
         bool up = false;
         bool down = false;
         bool left = false;
         bool right = false;
 
-        if (movement != Vector2.zero)
+        // Prioritize the strongest movement direction
+        if (Mathf.Abs(movement.x) > Mathf.Abs(movement.y))
         {
-            // Prioritize the strongest movement direction
-            if (Mathf.Abs(movement.x) > Mathf.Abs(movement.y))
-            {
-                right = movement.x > 0;
-                left = movement.x < 0;
-            }
-            else
-            {
-                up = movement.y > 0;
-                down = movement.y < 0;
-            }
+            right = movement.x > 0;
+            left = movement.x < 0;
+        }
+        else
+        {
+            up = movement.y > 0;
+            down = movement.y < 0;
         }
 
         animator.SetBool("Walk Up", up);
