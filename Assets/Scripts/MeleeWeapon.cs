@@ -1,17 +1,34 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MeleeWeapons : MonoBehaviour
 {
-    [Header("Weapon Object")]
+    [Header("Weapon")]
     public Transform meleeWeapon;
 
     [Header("Attack Settings")]
     public float meleeRange = 0.7f;
     public float swingDuration = 0.2f;
+    public float attackCooldown = 0.35f;
+
+    [Header("Damage")]
+    public int meleeDamage = 20;
+    public float hitRadius = 0.5f;
+
+    [Header("Collision")]
+    public LayerMask wallLayer;
 
     public bool IsSwinging { get; private set; }
+
+    private float nextAttackTime = 0f;
+
+    void Awake()
+    {
+        if (wallLayer.value == 0)
+            wallLayer = LayerMask.GetMask("Walls");
+    }
 
     public bool CanPickup(Vector2 playerPosition, float range)
     {
@@ -38,7 +55,6 @@ public class MeleeWeapons : MonoBehaviour
         );
     }
 
-    // Hide melee weapon when picked up.
     public void Pickup()
     {
         if (meleeWeapon == null)
@@ -46,10 +62,9 @@ public class MeleeWeapons : MonoBehaviour
 
         meleeWeapon.gameObject.SetActive(false);
 
-        Debug.Log("Melee weapon picked up!");
+        Debug.Log("Melee picked up!");
     }
 
-    // Show melee weapon when dropped.
     public void Drop(Vector2 position)
     {
         if (meleeWeapon == null)
@@ -64,13 +79,18 @@ public class MeleeWeapons : MonoBehaviour
         meleeWeapon.rotation = Quaternion.identity;
         meleeWeapon.gameObject.SetActive(true);
 
-        Debug.Log("Melee weapon dropped!");
+        Debug.Log("Melee dropped!");
     }
 
     public void Attack(Transform player, Vector2 direction)
     {
-        if (meleeWeapon == null || player == null || IsSwinging)
+        if (meleeWeapon == null || player == null)
             return;
+
+        if (IsSwinging || Time.time < nextAttackTime)
+            return;
+
+        nextAttackTime = Time.time + attackCooldown;
 
         StartCoroutine(SwingRoutine(player, direction));
     }
@@ -89,7 +109,9 @@ public class MeleeWeapons : MonoBehaviour
             direction.x
         );
 
-        // Show weapon while swinging.
+        HashSet<GuardHealth> damagedGuards =
+            new HashSet<GuardHealth>();
+
         meleeWeapon.gameObject.SetActive(true);
 
         float elapsed = 0f;
@@ -105,21 +127,20 @@ public class MeleeWeapons : MonoBehaviour
                 progress
             );
 
-            Vector2 position =
+            Vector2 attackPosition =
                 (Vector2)player.position +
                 direction * meleeRange +
                 side * offset;
 
             meleeWeapon.position = new Vector3(
-                position.x,
-                position.y,
+                attackPosition.x,
+                attackPosition.y,
                 meleeWeapon.position.z
             );
 
-            float angle = Mathf.Atan2(
-                direction.y,
-                direction.x
-            ) * Mathf.Rad2Deg - 90f;
+            float angle =
+                Mathf.Atan2(direction.y, direction.x)
+                * Mathf.Rad2Deg - 90f;
 
             meleeWeapon.rotation = Quaternion.Euler(
                 0f,
@@ -127,17 +148,59 @@ public class MeleeWeapons : MonoBehaviour
                 angle + Mathf.Lerp(-50f, 50f, progress)
             );
 
+            // Check which guards the swing touches.
+            CheckMeleeHits(
+                player.position,
+                attackPosition,
+                damagedGuards
+            );
+
             elapsed += Time.deltaTime;
 
             yield return null;
         }
 
-        // Weapon returns to inventory after the swing.
         meleeWeapon.gameObject.SetActive(false);
         meleeWeapon.rotation = Quaternion.identity;
 
         IsSwinging = false;
+    }
 
-        Debug.Log("Melee swing finished!");
+    void CheckMeleeHits(
+        Vector2 playerPosition,
+        Vector2 attackPosition,
+        HashSet<GuardHealth> damagedGuards)
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
+            attackPosition,
+            hitRadius
+        );
+
+        foreach (Collider2D hit in hits)
+        {
+            if (hit.isTrigger)
+                continue;
+
+            GuardHealth guard =
+                hit.GetComponentInParent<GuardHealth>();
+
+            if (guard == null || damagedGuards.Contains(guard))
+                continue;
+
+            // Don't hit guards through walls.
+            RaycastHit2D wall = Physics2D.Linecast(
+                playerPosition,
+                hit.bounds.center,
+                wallLayer
+            );
+
+            if (wall.collider != null)
+                continue;
+
+            damagedGuards.Add(guard);
+            guard.TakeDamage(meleeDamage);
+
+            Debug.Log("Melee hit NPC!");
+        }
     }
 }

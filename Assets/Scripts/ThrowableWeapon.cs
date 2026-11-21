@@ -4,7 +4,7 @@ using System.Collections;
 
 public class ThrowableWeapons : MonoBehaviour
 {
-    [Header("Weapon Object")]
+    [Header("Weapon")]
     public Transform throwableItem;
 
     [Header("Throw Settings")]
@@ -12,18 +12,18 @@ public class ThrowableWeapons : MonoBehaviour
     public float throwSpeed = 8f;
     public float itemRadius = 0.25f;
 
-    [Header("Walls")]
+    [Header("Damage")]
+    public int throwDamage = 40;
+
+    [Header("Collision")]
     public LayerMask wallLayer;
 
     public bool IsFlying { get; private set; }
 
     void Awake()
     {
-        // Automatically find the Walls layer if not assigned.
         if (wallLayer.value == 0)
-        {
             wallLayer = LayerMask.GetMask("Walls");
-        }
     }
 
     public bool CanPickup(Vector2 playerPosition, float range)
@@ -51,7 +51,6 @@ public class ThrowableWeapons : MonoBehaviour
         );
     }
 
-    // Hide the item when collected.
     public void Pickup()
     {
         if (throwableItem == null)
@@ -62,7 +61,6 @@ public class ThrowableWeapons : MonoBehaviour
         Debug.Log("Throwable picked up!");
     }
 
-    // Make the item visible on the ground.
     public void Drop(Vector2 position)
     {
         if (throwableItem == null)
@@ -78,7 +76,6 @@ public class ThrowableWeapons : MonoBehaviour
         throwableItem.gameObject.SetActive(true);
     }
 
-    // Throw the equipped weapon.
     public bool Throw(Vector2 start, Vector2 direction)
     {
         if (throwableItem == null || IsFlying)
@@ -100,10 +97,8 @@ public class ThrowableWeapons : MonoBehaviour
         Vector2 position = start;
         float traveled = 0f;
 
-        // Show the weapon at the player's position.
-        Drop(position);
+        Drop(start);
 
-        // Move until maximum distance or wall collision.
         while (traveled < throwDistance)
         {
             float step = Mathf.Min(
@@ -111,19 +106,57 @@ public class ThrowableWeapons : MonoBehaviour
                 throwDistance - traveled
             );
 
-            // Check whether the next movement hits a wall.
-            RaycastHit2D hit = Physics2D.CircleCast(
+            if (step <= 0f)
+            {
+                yield return null;
+                continue;
+            }
+
+            // Look for every collider along the next step.
+            RaycastHit2D[] hits = Physics2D.CircleCastAll(
                 position,
                 itemRadius,
                 direction,
-                step + 0.02f,
-                wallLayer
+                step + 0.02f
             );
 
-            if (hit.collider != null)
+            float closestDistance = Mathf.Infinity;
+            GuardHealth hitGuard = null;
+            Collider2D hitWall = null;
+
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider == null)
+                    continue;
+
+                // Ignore vision and punch triggers.
+                if (hit.collider.isTrigger)
+                    continue;
+
+                bool isWall =
+                    (wallLayer.value &
+                    (1 << hit.collider.gameObject.layer)) != 0;
+
+                GuardHealth guard =
+                    hit.collider.GetComponentInParent<GuardHealth>();
+
+                // Ignore player and unrelated objects.
+                if (!isWall && guard == null)
+                    continue;
+
+                if (hit.distance < closestDistance)
+                {
+                    closestDistance = hit.distance;
+                    hitGuard = isWall ? null : guard;
+                    hitWall = isWall ? hit.collider : null;
+                }
+            }
+
+            // Hit a wall or NPC.
+            if (closestDistance < Mathf.Infinity)
             {
                 float safeStep = Mathf.Clamp(
-                    hit.distance - 0.02f,
+                    closestDistance - 0.02f,
                     0f,
                     step
                 );
@@ -136,7 +169,16 @@ public class ThrowableWeapons : MonoBehaviour
                     throwableItem.position.z
                 );
 
-                Debug.Log("Throwable hit: " + hit.collider.name);
+                if (hitGuard != null)
+                {
+                    hitGuard.TakeDamage(throwDamage);
+                    Debug.Log("Throwable hit NPC!");
+                }
+                else if (hitWall != null)
+                {
+                    Debug.Log("Throwable hit wall!");
+                }
+
                 break;
             }
 
@@ -152,9 +194,8 @@ public class ThrowableWeapons : MonoBehaviour
             yield return null;
         }
 
-        // The item remains visible where it landed.
         IsFlying = false;
 
-        Debug.Log("Throwable landed! Pick it up with A.");
+        Debug.Log("Throwable landed. It can be picked up again!");
     }
 }
