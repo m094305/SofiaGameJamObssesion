@@ -58,20 +58,42 @@ public class PlayerInventory : MonoBehaviour
     }
 
     // BUTTON A - PICK UP WEAPON
+
     public void TryPickup()
     {
+        Debug.Log("A button pressed - trying to pick up weapon");
+
         if (isSwinging)
+        {
+            Debug.Log("Cannot pick up while swinging!");
             return;
+        }
+
+        if (meleeWeapon == null)
+        {
+            Debug.LogWarning("Melee weapon is NOT assigned!");
+        }
+        else
+        {
+            float distance = Vector2.Distance(
+                transform.position,
+                meleeWeapon.position
+            );
+
+            Debug.Log("Distance to melee: " + distance);
+            Debug.Log("Pickup range: " + pickupRange);
+            Debug.Log("Melee active: " +
+                meleeWeapon.gameObject.activeInHierarchy);
+        }
 
         WeaponType nearbyWeapon = FindNearbyWeapon();
 
         if (nearbyWeapon == WeaponType.None)
         {
-            Debug.Log("No weapon nearby!");
+            Debug.Log("No weapon in pickup range!");
             return;
         }
 
-        // Drop the old weapon before picking up the new one.
         if (equippedWeapon != WeaponType.None)
         {
             DropEquippedWeapon();
@@ -82,7 +104,7 @@ public class PlayerInventory : MonoBehaviour
         equippedWeapon = nearbyWeapon;
         item.gameObject.SetActive(false);
 
-        Debug.Log("Picked up: " + equippedWeapon);
+        Debug.Log("Successfully picked up: " + equippedWeapon);
     }
 
     WeaponType FindNearbyWeapon()
