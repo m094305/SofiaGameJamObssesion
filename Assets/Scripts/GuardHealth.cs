@@ -4,6 +4,7 @@ public class GuardHealth : MonoBehaviour
 {
     public int maxHealth = 60;
     public int currentHealth;
+    public bool isDead = false;   // from m094305's "possesions" commit
 
     private NPCGuard guard;
 
@@ -37,6 +38,7 @@ public class GuardHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            isDead = true;
             Debug.Log(name + (stealthHit ? ": Stealth takedown!" : ": Defeated!"));
             // Queue the death lines before the NPC is switched off.
             if (dialogue != null) dialogue.OnKilled();

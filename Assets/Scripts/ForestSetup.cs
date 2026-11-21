@@ -24,13 +24,13 @@ public class ForestSetup : MonoBehaviour
     [Tooltip("Rock tiles (on either tilemap) that get a collider shaped to the rock.")]
     public string[] rockTileNames = { "MuahroomShit_4", "MuahroomShit_8" };
     [Tooltip("Collider size as a fraction of the rock sprite (width, height). Height is measured from the bottom, so you can walk a little 'behind' the top of the rock.")]
-    public Vector2 rockColliderScale = new Vector2(0.85f, 0.6f);
+    public Vector2 rockColliderScale = new Vector2(0.7f, 0.45f);
 
     [Header("Logs")]
     [Tooltip("Fallen log tiles (on either tilemap) that get a collider shaped to the log.")]
     public string[] logTileNames = { "MuahroomShit_0" };
     [Tooltip("Collider size as a fraction of the log sprite (width, height), centred on the log.")]
-    public Vector2 logColliderScale = new Vector2(0.9f, 0.45f);
+    public Vector2 logColliderScale = new Vector2(0.8f, 0.3f);
 
     [Header("Hiding bushes")]
     [Tooltip("Tile on the Objects tilemap that the player can hide in.")]
@@ -176,7 +176,7 @@ public class ForestSetup : MonoBehaviour
 
                 var box = go.AddComponent<BoxCollider2D>();
                 box.size = colSize;
-                box.edgeRadius = Mathf.Min(colSize.x, colSize.y) * 0.15f; // rounded corners, slide around easier
+                box.edgeRadius = Mathf.Min(colSize.x, colSize.y) * 0.4f; // well-rounded corners so you slide around instead of snagging
                 box.size = colSize - Vector2.one * box.edgeRadius * 2f;
                 count++;
             }

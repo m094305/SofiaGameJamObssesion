@@ -43,6 +43,11 @@ public class DialogueManager : MonoBehaviour
     public bool IsDialogueActive => isDialogueActive;
     public static bool AnyDialogueActive => Instance != null && Instance.isDialogueActive;
 
+    // The button that closes the last line shouldn't also attack/interact that same frame.
+    private static int lastEndedFrame = -10;
+    public static bool InputBlocked =>
+        AnyDialogueActive || UnityEngine.Time.frameCount - lastEndedFrame <= 1;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -53,6 +58,9 @@ public class DialogueManager : MonoBehaviour
         Instance = this;
 
         advanceAction = new InputAction("AdvanceDialogue", InputActionType.Button, advanceBinding);
+        // Also the arcade attack button, K/Space/Enter and the gamepad A button.
+        foreach (string b in GameInput.AdvanceDialogueBindings)
+            if (b != advanceBinding) advanceAction.AddBinding(b);
         advanceAction.performed += OnAdvancePerformed;
     }
 
@@ -231,6 +239,7 @@ public class DialogueManager : MonoBehaviour
 
         isTyping = false;
         isDialogueActive = false;
+        lastEndedFrame = Time.frameCount;
         HideAllPortraits();
 
         if (dialogBoxAnimator != null)

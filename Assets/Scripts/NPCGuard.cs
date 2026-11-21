@@ -89,6 +89,8 @@ public class NPCGuard : MonoBehaviour
     private bool interacted;
     private float lastSeenTime = -100f;
     private float nextPunchTime;
+    private bool inDialogue;
+    private Vector2 dialogueStartVelocity;
 
     void Awake()
     {
@@ -157,20 +159,26 @@ public class NPCGuard : MonoBehaviour
             return;
         }
 
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (GameInput.InteractPressed)
             Interact();
     }
 
     void FixedUpdate()
     {
-        // Everyone stands still while a conversation is on screen.
-        if (DialogueManager.AnyDialogueActive)
+        // Everyone glides to a stop while a conversation is on screen.
+        if (DialogueManager.AnyDialogueActive || DialogueDirector.Freezing)
         {
-            rb.linearVelocity = Vector2.zero;
+            if (!inDialogue)
+            {
+                inDialogue = true;
+                dialogueStartVelocity = rb.linearVelocity;
+            }
+            rb.linearVelocity = dialogueStartVelocity * DialogueDirector.MoveScale;
             stuckCheckTime = Time.time;     // don't count the pause as being stuck
             lastSeenTime = Time.time;       // and don't lose the player during it
             return;
         }
+        inDialogue = false;
 
         // A peaceful NPC only patrols; spotting the player does not start combat.
         if (!isHostile)
@@ -504,7 +512,7 @@ public class NPCGuard : MonoBehaviour
     {
         // No interact prompt (or E-to-interact) while a conversation is on screen;
         // E belongs to the dialogue then.
-        if (DialogueManager.AnyDialogueActive)
+        if (DialogueManager.InputBlocked)
             return false;
 
         // Only when close AND the NPC can see you.
@@ -538,7 +546,7 @@ public class NPCGuard : MonoBehaviour
         );
 
         if (GUI.Button(buttonRect,
-            interacted ? "Interacted!" : "Interact (E)"))
+            interacted ? "Interacted!" : "Interact (E / J)"))
         {
             Interact();
         }

@@ -77,18 +77,51 @@ public class DialogueDirector : MonoBehaviour
         Stolen = Item.None;
     }
 
+    // ---- Easing into the freeze ----
+    [Tooltip("Seconds for everyone to glide to a stop when a conversation starts.")]
+    public float slowDownTime = 1f;
+
+    float slowStart;
+    int lastEndFrame = -100;
+    Vector2 playerStartVelocity;
+    bool playerWasMoving;
+    bool playerPosed;
+    string playerFaceState;
+    NPCSpriteAnimator talkingNpcAnim;
+
+    // 1 = normal speed, eases to 0 over slowDownTime once a conversation starts.
+    public static float MoveScale { get; private set; } = 1f;
+
+    // True while characters should be held (also for the frame or two between
+    // back-to-back conversations, so nobody lurches forward in between).
+    public static bool Freezing =>
+        instance != null && (instance.running || Time.frameCount - instance.lastEndFrame <= 2);
+
+    void FixedUpdate()
+    {
+        if (running && playerBody != null)
+            playerBody.linearVelocity = playerStartVelocity * MoveScale;
+    }
+
     void Update()
     {
         if (running)
         {
             if (DialogueManager.AnyDialogueActive)
             {
-                HoldPlayer();
+                float t = slowDownTime > 0f ? (Time.time - slowStart) / slowDownTime : 1f;
+                MoveScale = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
+                AnimatePlayerFacing();
                 KeepBoxShown();
                 return;
             }
             ReleasePlayer();
             running = false;
+            lastEndFrame = Time.frameCount;
+        }
+        else if (!Freezing)
+        {
+            MoveScale = 1f;
         }
 
         if (queue.Count > 0 && DialogueManager.Instance != null && !DialogueManager.AnyDialogueActive)
@@ -118,24 +151,61 @@ public class DialogueDirector : MonoBehaviour
             lines.Add(line);
         }
 
+        bool chained = Time.frameCount - lastEndFrame <= 2;   // straight after another conversation
+
         DialogueManager.Instance.StartDialogue(lines);
         running = DialogueManager.AnyDialogueActive;
         if (!running)
             return;
 
-        // Face each other.
+        // Glide to a stop instead of freezing on the spot (already stopped if chained).
+        if (chained)
+        {
+            slowStart = Time.time - slowDownTime;
+            MoveScale = 0f;
+            playerStartVelocity = Vector2.zero;
+        }
+        else
+        {
+            slowStart = Time.time;
+            MoveScale = 1f;
+            playerStartVelocity = playerBody != null ? playerBody.linearVelocity : Vector2.zero;
+        }
+        playerWasMoving = playerStartVelocity.sqrMagnitude > 0.01f;
+        playerPosed = false;
+        if (playerMove != null) playerMove.enabled = false;
+
+        // Turn to face each other straight away, while still slowing down.
+        playerFaceState = null;
+        if (talkingNpcAnim != null) talkingNpcAnim.LookAt(null);
+        talkingNpcAnim = null;
         if (player != null && r.npc != null)
         {
             Vector2 toNpc = (Vector2)r.npc.position - (Vector2)player.position;
             FacePlayer(toNpc);
 
-            NPCSpriteAnimator npcAnim = r.npc.GetComponentInChildren<NPCSpriteAnimator>(true);
-            if (npcAnim != null)
-                npcAnim.Face(-toNpc);
+            talkingNpcAnim = r.npc.GetComponentInChildren<NPCSpriteAnimator>(true);
+            if (talkingNpcAnim != null)
+                talkingNpcAnim.LookAt(player);
         }
+    }
 
-        if (playerMove != null) playerMove.enabled = false;
-        HoldPlayer();
+    // Player keeps "walking" (slowing) in the facing direction, then holds a clean pose.
+    void AnimatePlayerFacing()
+    {
+        if (playerAnim == null || playerFaceState == null) return;
+
+        if (playerWasMoving && MoveScale > 0.02f)
+        {
+            playerAnim.speed = MoveScale;
+        }
+        else if (!playerPosed)
+        {
+            playerAnim.Play(playerFaceState, 0, 0f);
+            playerAnim.Update(0f);
+            playerAnim.speed = 0f;
+            playerPosed = true;
+        }
     }
 
     // When one conversation ends and the next starts right away, the box's "hide" and
@@ -171,16 +241,13 @@ public class DialogueDirector : MonoBehaviour
         playerAnim = ph.GetComponentInChildren<Animator>();
     }
 
-    void HoldPlayer()
-    {
-        if (playerBody != null)
-            playerBody.linearVelocity = Vector2.zero;
-    }
-
     void ReleasePlayer()
     {
+        if (playerBody != null) playerBody.linearVelocity = Vector2.zero;
         if (playerAnim != null) playerAnim.speed = 1f;
         if (playerMove != null) playerMove.enabled = true;
+        if (talkingNpcAnim != null) talkingNpcAnim.LookAt(null);
+        talkingNpcAnim = null;
     }
 
     // The player only has walk animations, so hold the first frame of the right one.
@@ -196,9 +263,14 @@ public class DialogueDirector : MonoBehaviour
         foreach (string b in new[] { "Walk Up", "Walk Down", "Walk Left", "Walk Right" })
             playerAnim.SetBool(b, false);
 
+        playerFaceState = state;
+        // Hold this direction's walk flag on, or the animator drops straight back to Idle.
+        playerAnim.SetBool(state, true);
         playerAnim.Play(state, 0, 0f);
         playerAnim.Update(0f);
-        playerAnim.speed = 0f;
+        // Keep the walk cycle going (slowing with MoveScale) only if they were moving.
+        playerAnim.speed = playerWasMoving ? 1f : 0f;
+        playerPosed = !playerWasMoving;
     }
 
     // Narcissus' portrait shows the pieces he has taken so far.

@@ -28,6 +28,10 @@ public class PlayerInventory : MonoBehaviour
 
     private bool inventoryOpen = false;
 
+    // Read by InventoryView (the on-screen inventory panel).
+    public bool IsOpen => inventoryOpen;
+    public WeaponType Equipped => equippedWeapon;
+
     void Awake()
     {
         // Inventory should be directly under Player.
@@ -219,7 +223,8 @@ public class PlayerInventory : MonoBehaviour
 
     void OnGUI()
     {
-        if (!inventoryOpen)
+        // The InventoryView panel replaces this debug box when it's in the scene.
+        if (!inventoryOpen || InventoryView.Exists)
             return;
 
         GUI.Box(

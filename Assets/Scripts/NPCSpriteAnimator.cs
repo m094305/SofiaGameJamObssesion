@@ -31,9 +31,36 @@ public class NPCSpriteAnimator : MonoBehaviour
         Show(0);
     }
 
+    Transform lookTarget;
+
+    // Keep facing this target (e.g. the player during a conversation), even while still sliding.
+    public void LookAt(Transform target)
+    {
+        lookTarget = target;
+    }
+
     void Update()
     {
         Vector2 v = body != null ? body.linearVelocity : Vector2.zero;
+
+        if (lookTarget != null)
+        {
+            Vector2 d = (Vector2)lookTarget.position - (Vector2)transform.position;
+            if (d.sqrMagnitude > 0.0001f)
+            {
+                Sprite[] faceDir = Mathf.Abs(d.x) > Mathf.Abs(d.y)
+                    ? (d.x > 0f ? right : left)
+                    : (d.y > 0f ? up : down);
+                if (faceDir != current) { current = faceDir; frame = 0; timer = 0f; }
+            }
+            // Steps slow down with the glide, then stand still.
+            if (v.sqrMagnitude < moveThreshold * moveThreshold) { Show(0); return; }
+            timer += Time.deltaTime * Mathf.Clamp01(v.magnitude / 1.5f);
+            float s = 1f / Mathf.Max(0.01f, framesPerSecond);
+            while (timer >= s) { timer -= s; frame++; }
+            Show(frame);
+            return;
+        }
 
         if (v.sqrMagnitude < moveThreshold * moveThreshold)
         {
