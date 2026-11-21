@@ -4,6 +4,7 @@ public class GuardHealth : MonoBehaviour
 {
     public int maxHealth = 60;
     public int currentHealth;
+    public bool isDead = false;
 
     private NPCGuard guard;
 
@@ -33,6 +34,7 @@ public class GuardHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            isDead = true;
             Debug.Log(name + (stealthHit ? ": Stealth takedown!" : ": Defeated!"));
             // Disable the NPC root even when GuardHealth is attached to a child.
             (guard != null ? guard.gameObject : gameObject).SetActive(false);
