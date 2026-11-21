@@ -1,9 +1,10 @@
+
 using UnityEngine;
 using System.Collections;
 
 public class MeleeWeapons : MonoBehaviour
 {
-    [Header("Weapon")]
+    [Header("Weapon Object")]
     public Transform meleeWeapon;
 
     [Header("Attack Settings")]
@@ -37,6 +38,7 @@ public class MeleeWeapons : MonoBehaviour
         );
     }
 
+    // Hide melee weapon when picked up.
     public void Pickup()
     {
         if (meleeWeapon == null)
@@ -47,6 +49,7 @@ public class MeleeWeapons : MonoBehaviour
         Debug.Log("Melee weapon picked up!");
     }
 
+    // Show melee weapon when dropped.
     public void Drop(Vector2 position)
     {
         if (meleeWeapon == null)
@@ -66,7 +69,7 @@ public class MeleeWeapons : MonoBehaviour
 
     public void Attack(Transform player, Vector2 direction)
     {
-        if (meleeWeapon == null || IsSwinging)
+        if (meleeWeapon == null || player == null || IsSwinging)
             return;
 
         StartCoroutine(SwingRoutine(player, direction));
@@ -86,6 +89,7 @@ public class MeleeWeapons : MonoBehaviour
             direction.x
         );
 
+        // Show weapon while swinging.
         meleeWeapon.gameObject.SetActive(true);
 
         float elapsed = 0f;
@@ -128,10 +132,12 @@ public class MeleeWeapons : MonoBehaviour
             yield return null;
         }
 
+        // Weapon returns to inventory after the swing.
         meleeWeapon.gameObject.SetActive(false);
         meleeWeapon.rotation = Quaternion.identity;
 
         IsSwinging = false;
+
+        Debug.Log("Melee swing finished!");
     }
 }
-

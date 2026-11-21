@@ -4,7 +4,7 @@ using System.Collections;
 
 public class ThrowableWeapons : MonoBehaviour
 {
-    [Header("Weapon")]
+    [Header("Weapon Object")]
     public Transform throwableItem;
 
     [Header("Throw Settings")]
@@ -12,10 +12,19 @@ public class ThrowableWeapons : MonoBehaviour
     public float throwSpeed = 8f;
     public float itemRadius = 0.25f;
 
-    [Header("Collision")]
+    [Header("Walls")]
     public LayerMask wallLayer;
 
     public bool IsFlying { get; private set; }
+
+    void Awake()
+    {
+        // Automatically find the Walls layer if not assigned.
+        if (wallLayer.value == 0)
+        {
+            wallLayer = LayerMask.GetMask("Walls");
+        }
+    }
 
     public bool CanPickup(Vector2 playerPosition, float range)
     {
@@ -42,6 +51,7 @@ public class ThrowableWeapons : MonoBehaviour
         );
     }
 
+    // Hide the item when collected.
     public void Pickup()
     {
         if (throwableItem == null)
@@ -49,9 +59,10 @@ public class ThrowableWeapons : MonoBehaviour
 
         throwableItem.gameObject.SetActive(false);
 
-        Debug.Log("Ranged weapon picked up!");
+        Debug.Log("Throwable picked up!");
     }
 
+    // Make the item visible on the ground.
     public void Drop(Vector2 position)
     {
         if (throwableItem == null)
@@ -67,17 +78,20 @@ public class ThrowableWeapons : MonoBehaviour
         throwableItem.gameObject.SetActive(true);
     }
 
-    public void Throw(Vector2 start, Vector2 direction)
+    // Throw the equipped weapon.
+    public bool Throw(Vector2 start, Vector2 direction)
     {
         if (throwableItem == null || IsFlying)
-            return;
+            return false;
 
         StartCoroutine(ThrowRoutine(start, direction));
+        return true;
     }
 
     IEnumerator ThrowRoutine(Vector2 start, Vector2 direction)
     {
         IsFlying = true;
+
         direction = direction.normalized;
 
         if (direction == Vector2.zero)
@@ -86,11 +100,10 @@ public class ThrowableWeapons : MonoBehaviour
         Vector2 position = start;
         float traveled = 0f;
 
-        Drop(start);
+        // Show the weapon at the player's position.
+        Drop(position);
 
-        if (wallLayer.value == 0)
-            Debug.LogWarning("Assign the Walls layer!");
-
+        // Move until maximum distance or wall collision.
         while (traveled < throwDistance)
         {
             float step = Mathf.Min(
@@ -98,7 +111,7 @@ public class ThrowableWeapons : MonoBehaviour
                 throwDistance - traveled
             );
 
-            // Check for walls before moving.
+            // Check whether the next movement hits a wall.
             RaycastHit2D hit = Physics2D.CircleCast(
                 position,
                 itemRadius,
@@ -123,7 +136,7 @@ public class ThrowableWeapons : MonoBehaviour
                     throwableItem.position.z
                 );
 
-                Debug.Log("Hit wall: " + hit.collider.name);
+                Debug.Log("Throwable hit: " + hit.collider.name);
                 break;
             }
 
@@ -139,8 +152,9 @@ public class ThrowableWeapons : MonoBehaviour
             yield return null;
         }
 
+        // The item remains visible where it landed.
         IsFlying = false;
 
-        Debug.Log("Throwable weapon landed!");
+        Debug.Log("Throwable landed! Pick it up with A.");
     }
 }

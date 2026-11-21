@@ -13,13 +13,13 @@ public class PlayerInventory : MonoBehaviour
     [Header("Player")]
     public Transform player;
 
-    [Header("Inventory Children")]
+    [Header("Weapon Systems")]
     public ThrowableWeapons throwableWeapons;
     public MeleeWeapons meleeWeapons;
 
     [Header("Settings")]
-    public float pickupRange = 1.5f;
-    public float dropDistance = 0.6f;
+    public float pickupRange = 2f;
+    public float dropDistance = 0.7f;
 
     private WeaponType equippedWeapon = WeaponType.None;
 
@@ -30,17 +30,22 @@ public class PlayerInventory : MonoBehaviour
 
     void Awake()
     {
+        // Inventory should be directly under Player.
         if (player == null)
             player = transform.parent;
 
         if (throwableWeapons == null)
-            throwableWeapons = GetComponentInChildren<ThrowableWeapons>();
+            throwableWeapons =
+                GetComponentInChildren<ThrowableWeapons>(true);
 
         if (meleeWeapons == null)
-            meleeWeapons = GetComponentInChildren<MeleeWeapons>();
+            meleeWeapons =
+                GetComponentInChildren<MeleeWeapons>(true);
 
         if (player != null)
             previousPosition = player.position;
+        else
+            Debug.LogError("Player is not assigned!");
     }
 
     void LateUpdate()
@@ -57,26 +62,13 @@ public class PlayerInventory : MonoBehaviour
         previousPosition = currentPosition;
     }
 
-    // BUTTON A - PICK UP / SWITCH
-
+    // A - PICK UP A WEAPON
     public void TryPickup()
     {
-        Debug.Log("A pressed - Checking weapons");
-
         if (player == null)
         {
-            Debug.LogError("Player is not assigned!");
+            Debug.LogError("Player missing!");
             return;
-        }
-
-        if (throwableWeapons == null)
-        {
-            Debug.LogError("ThrowableWeapons is not assigned!");
-        }
-
-        if (meleeWeapons == null)
-        {
-            Debug.LogError("MeleeWeapons is not assigned!");
         }
 
         if (meleeWeapons != null && meleeWeapons.IsSwinging)
@@ -84,52 +76,15 @@ public class PlayerInventory : MonoBehaviour
 
         Vector2 position = player.position;
 
-        bool rangedAvailable = false;
-        bool meleeAvailable = false;
+        bool canPickupRanged =
+            throwableWeapons != null &&
+            throwableWeapons.CanPickup(position, pickupRange);
 
-        // CHECK THROWABLE WEAPON
-        if (throwableWeapons != null)
-        {
-            if (throwableWeapons.throwableItem == null)
-            {
-                Debug.LogWarning("ThrowableItem is not assigned!");
-            }
-            else
-            {
-                Debug.Log("Ranged distance: " +
-                    throwableWeapons.DistanceTo(position));
+        bool canPickupMelee =
+            meleeWeapons != null &&
+            meleeWeapons.CanPickup(position, pickupRange);
 
-                Debug.Log("Ranged active: " +
-                    throwableWeapons.throwableItem.gameObject.activeInHierarchy);
-
-                rangedAvailable = throwableWeapons.CanPickup(
-                    position, pickupRange
-                );
-            }
-        }
-
-        // CHECK MELEE WEAPON
-        if (meleeWeapons != null)
-        {
-            if (meleeWeapons.meleeWeapon == null)
-            {
-                Debug.LogWarning("MeleeWeapon is not assigned!");
-            }
-            else
-            {
-                Debug.Log("Melee distance: " +
-                    meleeWeapons.DistanceTo(position));
-
-                Debug.Log("Melee active: " +
-                    meleeWeapons.meleeWeapon.gameObject.activeInHierarchy);
-
-                meleeAvailable = meleeWeapons.CanPickup(
-                    position, pickupRange
-                );
-            }
-        }
-
-        if (!rangedAvailable && !meleeAvailable)
+        if (!canPickupRanged && !canPickupMelee)
         {
             Debug.Log("No weapon in pickup range!");
             return;
@@ -137,64 +92,92 @@ public class PlayerInventory : MonoBehaviour
 
         WeaponType selected;
 
-        // Pick the closest available weapon.
-        if (rangedAvailable && meleeAvailable)
+        // Find the closest available weapon.
+        if (canPickupRanged && canPickupMelee)
         {
-            selected =
-                meleeWeapons.DistanceTo(position) <
-                throwableWeapons.DistanceTo(position)
+            float rangedDistance =
+                throwableWeapons.DistanceTo(position);
+
+            float meleeDistance =
+                meleeWeapons.DistanceTo(position);
+
+            selected = meleeDistance <= rangedDistance
                 ? WeaponType.Melee
                 : WeaponType.Ranged;
         }
         else
         {
-            selected = meleeAvailable
+            selected = canPickupMelee
                 ? WeaponType.Melee
                 : WeaponType.Ranged;
         }
 
-        // Drop the current weapon before picking up another.
+        // Drop the old weapon before picking up the new one.
         if (equippedWeapon != WeaponType.None)
         {
             DropEquippedWeapon();
         }
 
-        // Pick up the new weapon.
-        if (selected == WeaponType.Melee)
+        if (selected == WeaponType.Ranged)
         {
-            meleeWeapons.Pickup();
+            throwableWeapons.Pickup();
         }
         else
         {
-            throwableWeapons.Pickup();
+            meleeWeapons.Pickup();
         }
 
         equippedWeapon = selected;
 
-        Debug.Log("SUCCESSFULLY PICKED UP: " + equippedWeapon);
+        Debug.Log("EQUIPPED: " + equippedWeapon);
     }
 
-
+    // DROP EQUIPPED WEAPON
     void DropEquippedWeapon()
     {
-        Vector2 dropPosition =
-            (Vector2)player.position -
-            facingDirection * dropDistance;
+        if (player == null)
+            return;
 
-        // The old weapon is put back on the ground.
+        Vector2 direction = -facingDirection;
+        float distance = dropDistance;
+
+        int wallMask = LayerMask.GetMask("Walls");
+
+        if (wallMask != 0)
+        {
+            RaycastHit2D hit = Physics2D.CircleCast(
+                player.position,
+                0.25f,
+                direction,
+                dropDistance,
+                wallMask
+            );
+
+            if (hit.collider != null)
+            {
+                distance = Mathf.Max(
+                    0f,
+                    hit.distance - 0.02f
+                );
+            }
+        }
+
+        Vector2 position =
+            (Vector2)player.position + direction * distance;
+
         if (equippedWeapon == WeaponType.Ranged)
         {
-            throwableWeapons.Drop(dropPosition);
+            throwableWeapons.Drop(position);
         }
         else if (equippedWeapon == WeaponType.Melee)
         {
-            meleeWeapons.Drop(dropPosition);
+            meleeWeapons.Drop(position);
         }
 
         equippedWeapon = WeaponType.None;
     }
 
-    // BUTTON B - THROW OR MELEE ATTACK
+    // B - THROW OR SWING
     public void TryThrow()
     {
         if (player == null)
@@ -202,16 +185,15 @@ public class PlayerInventory : MonoBehaviour
 
         if (equippedWeapon == WeaponType.Ranged)
         {
-            if (throwableWeapons == null ||
-                throwableWeapons.IsFlying)
-                return;
-
-            equippedWeapon = WeaponType.None;
-
-            throwableWeapons.Throw(
-                player.position,
-                facingDirection
-            );
+            if (throwableWeapons != null &&
+                throwableWeapons.Throw(
+                    player.position,
+                    facingDirection
+                ))
+            {
+                // Weapon has left the inventory.
+                equippedWeapon = WeaponType.None;
+            }
         }
         else if (equippedWeapon == WeaponType.Melee)
         {
@@ -225,11 +207,11 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            Debug.Log("No weapon equipped!");
+            Debug.Log("Inventory is empty!");
         }
     }
 
-    // BUTTON C - INVENTORY
+    // C - OPEN / CLOSE INVENTORY
     public void ToggleInventory()
     {
         inventoryOpen = !inventoryOpen;
