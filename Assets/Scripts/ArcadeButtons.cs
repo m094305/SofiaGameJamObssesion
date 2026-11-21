@@ -38,7 +38,7 @@ public class ArcadeButtons : MonoBehaviour
             return;
 
         // Frozen while a conversation is on screen: no picking up, attacking or inventory.
-        if (DialogueManager.InputBlocked)
+        if (DialogueManager.InputBlocked || DialogueDirector.Freezing)
             return;
 
         // A - PICK UP / SWITCH

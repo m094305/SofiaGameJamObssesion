@@ -70,6 +70,15 @@ public class DialogueDirector : MonoBehaviour
             if (r.npc != npc) queue.Enqueue(r);
     }
 
+    // Statics survive between Play sessions when domain reload is off (this project) - reset them.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        instance = null;
+        Stolen = Item.None;
+        MoveScale = 1f;
+    }
+
     void Awake()
     {
         if (instance != null && instance != this) { Destroy(this); return; }
@@ -95,11 +104,49 @@ public class DialogueDirector : MonoBehaviour
     // True while characters should be held (also for the frame or two between
     // back-to-back conversations, so nobody lurches forward in between).
     public static bool Freezing =>
-        instance != null && (instance.running || Time.frameCount - instance.lastEndFrame <= 2);
+        instance != null && (instance.running || instance.cutsceneHold ||
+                             Time.frameCount - instance.lastEndFrame <= 2);
+
+    // ---- Holding everyone still for a cutscene (not just while text is on screen) ----
+    bool cutsceneHold;
+
+    public static void HoldForCutscene(bool hold)
+    {
+        Instance.SetCutsceneHold(hold);
+    }
+
+    void SetCutsceneHold(bool hold)
+    {
+        if (hold == cutsceneHold) return;
+        FindPlayer();
+        if (hold)
+        {
+            cutsceneHold = true;
+            if (!running)
+            {
+                slowStart = Time.time;          // glide to a stop, same as a conversation
+                MoveScale = 1f;
+                playerStartVelocity = playerBody != null ? playerBody.linearVelocity : Vector2.zero;
+                playerWasMoving = false;
+                playerFaceState = null;
+                if (playerAnim != null) playerAnim.speed = 0f;
+                if (playerMove != null) playerMove.enabled = false;
+            }
+        }
+        else
+        {
+            cutsceneHold = false;
+            if (!running)
+            {
+                ReleasePlayer();
+                lastEndFrame = Time.frameCount;
+            }
+        }
+    }
 
     void FixedUpdate()
     {
-        if (running && playerBody != null)
+        if ((running || cutsceneHold) && playerBody != null)
             playerBody.linearVelocity = playerStartVelocity * MoveScale;
     }
 
@@ -115,9 +162,14 @@ public class DialogueDirector : MonoBehaviour
                 KeepBoxShown();
                 return;
             }
-            ReleasePlayer();
             running = false;
             lastEndFrame = Time.frameCount;
+            if (!cutsceneHold) ReleasePlayer();   // a cutscene keeps holding until it ends
+        }
+        else if (cutsceneHold)
+        {
+            float t = slowDownTime > 0f ? (Time.time - slowStart) / slowDownTime : 1f;
+            MoveScale = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
         }
         else if (!Freezing)
         {

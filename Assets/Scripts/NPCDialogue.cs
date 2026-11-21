@@ -14,6 +14,8 @@ public class NPCDialogue : MonoBehaviour
     public GameObject portrait;
     [Tooltip("What Narcissus takes from this NPC when it dies (changes his portrait).")]
     public DialogueDirector.Item stolenItems;
+    [Tooltip("Optional: plays instead of the plain death text when killed by a thrown item without being seen.")]
+    public DeathCutscene deathCutscene;
 
     [Header("When it starts")]
     [Tooltip("Narcissus notices the NPC within this distance (needs a clear line of sight).")]
@@ -46,7 +48,7 @@ public class NPCDialogue : MonoBehaviour
             return;
 
         // Only start something new when nothing is on screen or waiting.
-        if (DialogueManager.AnyDialogueActive || DialogueDirector.Instance.HasPending)
+        if (DialogueManager.AnyDialogueActive || DialogueDirector.Freezing || DialogueDirector.Instance.HasPending)
             return;
 
         float d = Vector2.Distance(player.position, transform.position);
@@ -78,14 +80,19 @@ public class NPCDialogue : MonoBehaviour
     }
 
     // Called by GuardHealth right before the NPC is removed.
-    public void OnKilled()
+    // stealthThrow: killed by a thrown item without being seen -> play the death cutscene if there is one.
+    public void OnKilled(bool stealthThrow = false)
     {
         WasAttacked = true;
         DialogueDirector.Instance.CancelPending(transform);
         if (deathPlayed) return;
         deathPlayed = true;
         DialogueDirector.GiveItems(stolenItems);
-        Play(deathLines);
+
+        if (stealthThrow && deathCutscene != null)
+            deathCutscene.Play(deathLines);      // the shots, with the death lines over the last one
+        else
+            Play(deathLines);
     }
 
     void Play(List<DialogueLine> lines)

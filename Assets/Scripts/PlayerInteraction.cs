@@ -28,7 +28,7 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
-        bool inRange = IsInRange() && !DialogueManager.InputBlocked;
+        bool inRange = IsInRange() && !DialogueManager.InputBlocked && !DialogueDirector.Freezing;
 
         if (interactButton != null &&
             interactButton.gameObject.activeSelf != inRange)

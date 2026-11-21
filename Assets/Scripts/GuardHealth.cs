@@ -20,6 +20,12 @@ public class GuardHealth : MonoBehaviour
     // can continue calling TakeDamage(damage).
     public void TakeDamage(int damage)
     {
+        TakeDamage(damage, false);
+    }
+
+    // fromThrow: the hit came from a thrown item (used for the knight's death cutscene).
+    public void TakeDamage(int damage, bool fromThrow)
+    {
         if (currentHealth <= 0 || damage <= 0)
             return;
 
@@ -41,7 +47,8 @@ public class GuardHealth : MonoBehaviour
             isDead = true;
             Debug.Log(name + (stealthHit ? ": Stealth takedown!" : ": Defeated!"));
             // Queue the death lines before the NPC is switched off.
-            if (dialogue != null) dialogue.OnKilled();
+            // An unseen kill with a thrown item can play this NPC's death cutscene.
+            if (dialogue != null) dialogue.OnKilled(stealthHit && fromThrow);
             // Disable the NPC root even when GuardHealth is attached to a child.
             (guard != null ? guard.gameObject : gameObject).SetActive(false);
         }

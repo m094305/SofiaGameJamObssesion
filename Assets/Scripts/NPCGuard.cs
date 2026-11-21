@@ -512,7 +512,7 @@ public class NPCGuard : MonoBehaviour
     {
         // No interact prompt (or E-to-interact) while a conversation is on screen;
         // E belongs to the dialogue then.
-        if (DialogueManager.InputBlocked)
+        if (DialogueManager.InputBlocked || DialogueDirector.Freezing)
             return false;
 
         // Only when close AND the NPC can see you.

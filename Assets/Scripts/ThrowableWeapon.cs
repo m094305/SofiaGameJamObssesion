@@ -171,7 +171,7 @@ public class ThrowableWeapons : MonoBehaviour
 
                 if (hitGuard != null)
                 {
-                    hitGuard.TakeDamage(throwDamage);
+                    hitGuard.TakeDamage(throwDamage, true);
                     Debug.Log("Throwable hit NPC!");
                 }
                 else if (hitWall != null)
