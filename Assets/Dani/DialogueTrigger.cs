@@ -1,37 +1,47 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public class DialogueCharacter
+public enum SpeakerSide
 {
-    public string name;
-    public Sprite icon;
+    Left,
+    Right
 }
 
-[System.Serializable]
+[Serializable]
 public class DialogueLine
 {
-    public DialogueCharacter character;
-    [TextArea(3, 10)]
-    public string line;
-}
+    public string characterName;
 
-[System.Serializable]
-public class Dialogue
-{
-    public List<DialogueLine> dialogueLines = new List<DialogueLine>();
+    [TextArea(2, 5)]
+    public string line;
+
+    public SpeakerSide side = SpeakerSide.Right;
+
+    [Tooltip("Optional: assign a specific portrait GameObject (e.g., an ending Narcis image). Leave empty to auto-pick from characterName.")]
+    public GameObject portraitOverride;
 }
 
 public class DialogueTrigger : MonoBehaviour
 {
-    public Dialogue dialogue;
+    [Header("Dialogue Lines")]
+    public List<DialogueLine> dialogueLines = new List<DialogueLine>();
+
+    [Header("Trigger Settings")]
+    [SerializeField] private bool triggerOnce = false;
+    private bool hasTriggered = false;
 
     public void TriggerDialogue()
     {
-        if (DialogueManager.Instance != null && !DialogueManager.Instance.isDialogueActive)
+        if (triggerOnce && hasTriggered) return;
+        if (DialogueManager.Instance == null)
         {
-            DialogueManager.Instance.StartDialogue(dialogue);
+            Debug.LogWarning("DialogueManager.Instance is missing in the scene.");
+            return;
         }
+
+        hasTriggered = true;
+        DialogueManager.Instance.StartDialogue(dialogueLines);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

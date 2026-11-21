@@ -1,209 +1,237 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using TMPro;
 
 public class DialogueManager : MonoBehaviour
 {
-    public static DialogueManager Instance;
+    public static DialogueManager Instance { get; private set; }
 
-    [Header("UI References")]
-    public Image characterIcon;
-    public TextMeshProUGUI characterName;
-    public TextMeshProUGUI dialogueArea;
+    [Header("UI Text & Animator")]
+    [SerializeField] private Animator dialogBoxAnimator;
+    [SerializeField] private TextMeshProUGUI characterNameText;
+    [SerializeField] private TextMeshProUGUI dialogAreaText;
 
-    [Header("Settings")]
-    public bool isDialogueActive = false;
-    public float typingSpeed = 0.03f;
-    public int maxLinesPerPage = 2;
-    public KeyCode advanceKey = KeyCode.A;
-    public Animator animator;
+    [Header("Text Positions (Right vs. Left Speaker)")]
+    [SerializeField] private RectTransform characterNameRect;
+    [SerializeField] private RectTransform dialogAreaRect;
+    [SerializeField] private Vector2 namePosForRightSpeaker;
+    [SerializeField] private Vector2 dialogPosForRightSpeaker;
+    [SerializeField] private Vector2 namePosForLeftSpeaker;
+    [SerializeField] private Vector2 dialogPosForLeftSpeaker;
 
-    private Queue<DialogueLine> lines;
-    private Queue<string> currentLinePages;
-    private bool isTyping = false;
-    private bool skipTypingRequested = false;
+    [Header("Character Portrait Objects")]
+    [SerializeField] private GameObject knightPortrait;
+    [SerializeField] private GameObject vendorPortrait;
+    [SerializeField] private GameObject babataPortrait;
+    [SerializeField] private GameObject narcisShadowPortrait; // Main Narcis image for standard dialogs
+    [SerializeField] private List<GameObject> allPortraitObjects = new List<GameObject>();
+
+    [Header("Typing & Input Settings")]
+    [SerializeField] private float typingSpeed = 0.03f;
+    [SerializeField] private string advanceBinding = "<Keyboard>/e";
+
+    private readonly Queue<DialogueLine> lineQueue = new Queue<DialogueLine>();
+    private InputAction advanceAction;
+    private Coroutine typingCoroutine;
+    private DialogueLine currentLine;
+    private bool isDialogueActive;
+    private bool isTyping;
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
+        Instance = this;
 
-        lines = new Queue<DialogueLine>();
-        currentLinePages = new Queue<string>();
+        advanceAction = new InputAction("AdvanceDialogue", InputActionType.Button, advanceBinding);
+        advanceAction.performed += OnAdvancePerformed;
     }
 
-    private void Update()
+    private void OnEnable()
+    {
+        advanceAction?.Enable();
+    }
+
+    private void OnDisable()
+    {
+        advanceAction?.Disable();
+    }
+
+    private void OnDestroy()
+    {
+        if (advanceAction != null)
+        {
+            advanceAction.performed -= OnAdvancePerformed;
+            advanceAction.Dispose();
+        }
+    }
+
+    private void Start()
+    {
+        HideAllPortraits();
+    }
+
+    private void OnAdvancePerformed(InputAction.CallbackContext context)
     {
         if (!isDialogueActive) return;
 
-        if (Input.GetKeyDown(advanceKey))
+        if (isTyping)
         {
-            if (isTyping)
+            // Complete current line immediately if still typing
+            if (typingCoroutine != null)
             {
-                // Finish typing the current 2-line page immediately
-                skipTypingRequested = true;
+                StopCoroutine(typingCoroutine);
             }
-            else
+            if (dialogAreaText != null && currentLine != null)
             {
-                // Move to the next 2-line page or next DialogueLine
-                DisplayNextPageOrLine();
+                dialogAreaText.text = currentLine.line;
             }
+            isTyping = false;
+        }
+        else
+        {
+            DisplayNextLine();
         }
     }
 
-    public void StartDialogue(Dialogue dialogue)
+    public void StartDialogue(IEnumerable<DialogueLine> lines)
     {
+        if (lines == null) return;
+
+        lineQueue.Clear();
+        foreach (DialogueLine line in lines)
+        {
+            lineQueue.Enqueue(line);
+        }
+
         isDialogueActive = true;
 
-        if (animator != null)
+        if (dialogBoxAnimator != null)
         {
-            animator.Play("show");
+            dialogBoxAnimator.Play("show");
         }
 
-        lines.Clear();
-        currentLinePages.Clear();
-
-        foreach (DialogueLine dialogueLine in dialogue.dialogueLines)
-        {
-            lines.Enqueue(dialogueLine);
-        }
-
-        DisplayNextPageOrLine();
+        DisplayNextLine();
     }
 
-    public void DisplayNextPageOrLine()
+    public void DisplayNextLine()
     {
-        // If the current character's line still has 2-line chunks left, show the next chunk
-        if (currentLinePages.Count > 0)
-        {
-            StopAllCoroutines();
-            StartCoroutine(TypePage(currentLinePages.Dequeue()));
-            return;
-        }
-
-        // Otherwise, dequeue the next DialogueLine from the queue
-        if (lines.Count == 0)
+        if (lineQueue.Count == 0)
         {
             EndDialogue();
             return;
         }
 
-        DialogueLine currentLine = lines.Dequeue();
+        currentLine = lineQueue.Dequeue();
 
-        if (characterIcon != null)
+        if (characterNameText != null)
         {
-            characterIcon.sprite = currentLine.character.icon;
+            characterNameText.text = currentLine.characterName;
         }
 
-        if (characterName != null)
+        ApplyTextSideLayout(currentLine.side);
+        ShowActivePortrait(currentLine);
+
+        if (typingCoroutine != null)
         {
-            characterName.text = currentLine.character.name;
+            StopCoroutine(typingCoroutine);
         }
+        typingCoroutine = StartCoroutine(TypeSentence(currentLine.line));
+    }
 
-        BuildPagesForLine(currentLine.line);
-
-        StopAllCoroutines();
-        if (currentLinePages.Count > 0)
+    private IEnumerator TypeSentence(string sentence)
+    {
+        isTyping = true;
+        if (dialogAreaText != null)
         {
-            StartCoroutine(TypePage(currentLinePages.Dequeue()));
+            dialogAreaText.text = string.Empty;
+            foreach (char letter in sentence)
+            {
+                dialogAreaText.text += letter;
+                yield return new WaitForSeconds(typingSpeed);
+            }
+        }
+        isTyping = false;
+    }
+
+    private void ApplyTextSideLayout(SpeakerSide side)
+    {
+        if (side == SpeakerSide.Right)
+        {
+            if (characterNameRect != null) characterNameRect.anchoredPosition = namePosForRightSpeaker;
+            if (dialogAreaRect != null) dialogAreaRect.anchoredPosition = dialogPosForRightSpeaker;
         }
         else
         {
-            DisplayNextPageOrLine();
+            if (characterNameRect != null) characterNameRect.anchoredPosition = namePosForLeftSpeaker;
+            if (dialogAreaRect != null) dialogAreaRect.anchoredPosition = dialogPosForLeftSpeaker;
         }
     }
 
-    private void BuildPagesForLine(string fullLine)
+    private void ShowActivePortrait(DialogueLine line)
     {
-        currentLinePages.Clear();
+        HideAllPortraits();
 
-        if (string.IsNullOrWhiteSpace(fullLine) || dialogueArea == null)
+        GameObject targetPortrait = line.portraitOverride;
+
+        if (targetPortrait == null)
         {
-            currentLinePages.Enqueue(fullLine ?? "");
-            return;
-        }
+            string lowerName = (line.characterName ?? string.Empty).Trim().ToLowerInvariant();
 
-        string originalText = dialogueArea.text;
-        int originalMaxChars = dialogueArea.maxVisibleCharacters;
-
-        // Ensure all characters are visible while measuring line wrapping
-        dialogueArea.maxVisibleCharacters = int.MaxValue;
-
-        string[] words = fullLine.Split(' ');
-        string currentPage = "";
-
-        for (int i = 0; i < words.Length; i++)
-        {
-            string word = words[i];
-            string testPage = string.IsNullOrEmpty(currentPage) ? word : currentPage + " " + word;
-
-            dialogueArea.text = testPage;
-            dialogueArea.ForceMeshUpdate();
-
-            if (dialogueArea.textInfo.lineCount > maxLinesPerPage && !string.IsNullOrEmpty(currentPage))
+            if (lowerName.Contains("knight"))
             {
-                currentLinePages.Enqueue(currentPage);
-                currentPage = word;
+                targetPortrait = knightPortrait;
             }
-            else
+            else if (lowerName.Contains("vendor"))
             {
-                currentPage = testPage;
+                targetPortrait = vendorPortrait;
+            }
+            else if (lowerName.Contains("babata"))
+            {
+                targetPortrait = babataPortrait;
+            }
+            else if (lowerName.Contains("narcis"))
+            {
+                targetPortrait = narcisShadowPortrait;
             }
         }
 
-        if (!string.IsNullOrEmpty(currentPage))
+        if (targetPortrait != null)
         {
-            currentLinePages.Enqueue(currentPage);
+            targetPortrait.SetActive(true);
         }
-
-        dialogueArea.text = originalText;
-        dialogueArea.maxVisibleCharacters = originalMaxChars;
     }
 
-    IEnumerator TypePage(string pageText)
+    private void HideAllPortraits()
     {
-        isTyping = true;
-        skipTypingRequested = false;
-
-        dialogueArea.text = pageText;
-        dialogueArea.ForceMeshUpdate();
-
-        int totalChars = dialogueArea.textInfo.characterCount;
-        dialogueArea.maxVisibleCharacters = 0;
-
-        for (int i = 0; i <= totalChars; i++)
+        foreach (GameObject portrait in allPortraitObjects)
         {
-            if (skipTypingRequested)
+            if (portrait != null)
             {
-                dialogueArea.maxVisibleCharacters = totalChars;
-                break;
+                portrait.SetActive(false);
             }
+        }
+    }
 
-            dialogueArea.maxVisibleCharacters = i;
-            yield return new WaitForSeconds(typingSpeed);
+    public void EndDialogue()
+    {
+        if (typingCoroutine != null)
+        {
+            StopCoroutine(typingCoroutine);
         }
 
         isTyping = false;
-        skipTypingRequested = false;
-    }
-
-    void EndDialogue()
-    {
         isDialogueActive = false;
-        currentLinePages.Clear();
+        HideAllPortraits();
 
-        if (animator != null)
+        if (dialogBoxAnimator != null)
         {
-            animator.Play("hide");
+            dialogBoxAnimator.Play("hide");
         }
     }
 }

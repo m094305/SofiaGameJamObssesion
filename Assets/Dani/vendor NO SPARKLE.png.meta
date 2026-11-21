@@ -1,0 +1,808 @@
+fileFormatVersion: 2
+guid: 84def5f42eba9de459dc00310a36bfe4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7395659847136304974
+    second: vendor NO SPARKLE_0
+  - first:
+      213: 6244426527860314684
+    second: vendor NO SPARKLE_1
+  - first:
+      213: -2998479170910234530
+    second: vendor NO SPARKLE_2
+  - first:
+      213: -3620446731668746080
+    second: vendor NO SPARKLE_3
+  - first:
+      213: 5850178845273215343
+    second: vendor NO SPARKLE_4
+  - first:
+      213: -1930627063480314444
+    second: vendor NO SPARKLE_5
+  - first:
+      213: 6481268392555232826
+    second: vendor NO SPARKLE_6
+  - first:
+      213: -2636511151307586266
+    second: vendor NO SPARKLE_7
+  - first:
+      213: -6410904184699033614
+    second: vendor NO SPARKLE_8
+  - first:
+      213: -8067449676615392372
+    second: vendor NO SPARKLE_9
+  - first:
+      213: -6240298987703885759
+    second: vendor NO SPARKLE_10
+  - first:
+      213: -4787185366356897624
+    second: vendor NO SPARKLE_11
+  - first:
+      213: -2651565073754452375
+    second: vendor NO SPARKLE_12
+  - first:
+      213: 8661714833359499106
+    second: vendor NO SPARKLE_13
+  - first:
+      213: 3240351683179372961
+    second: vendor NO SPARKLE_14
+  - first:
+      213: 5347765722436688656
+    second: vendor NO SPARKLE_15
+  - first:
+      213: -331857435251358512
+    second: vendor NO SPARKLE_16
+  - first:
+      213: -3882254589589863049
+    second: vendor NO SPARKLE_17
+  - first:
+      213: 3624244864742547468
+    second: vendor NO SPARKLE_18
+  - first:
+      213: 3676064230851058894
+    second: vendor NO SPARKLE_19
+  - first:
+      213: -2947318536417550148
+    second: vendor NO SPARKLE_20
+  - first:
+      213: -5333231465384421175
+    second: vendor NO SPARKLE_21
+  - first:
+      213: 707234215543125274
+    second: vendor NO SPARKLE_22
+  - first:
+      213: 1506397293022598911
+    second: vendor NO SPARKLE_23
+  - first:
+      213: -1173644788935459744
+    second: vendor NO SPARKLE_24
+  - first:
+      213: 8005053270578020009
+    second: vendor NO SPARKLE_25
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_0
+      rect:
+        serializedVersion: 2
+        x: 4488
+        y: 1888
+        width: 13
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4fdd247279a2a660800000000000000
+      internalID: 7395659847136304974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_1
+      rect:
+        serializedVersion: 2
+        x: 4516
+        y: 1893
+        width: 17
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c32d32bb7d8a8a650800000000000000
+      internalID: 6244426527860314684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_2
+      rect:
+        serializedVersion: 2
+        x: 4144
+        y: 66
+        width: 1051
+        height: 1766
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e58dc77a4134366d0800000000000000
+      internalID: -2998479170910234530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_3
+      rect:
+        serializedVersion: 2
+        x: 4352
+        y: 98
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a019a621e691cdc0800000000000000
+      internalID: -3620446731668746080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_4
+      rect:
+        serializedVersion: 2
+        x: 4380
+        y: 113
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f61d3090aa2003150800000000000000
+      internalID: 5850178845273215343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_5
+      rect:
+        serializedVersion: 2
+        x: 4387
+        y: 91
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b510872ae80535e0800000000000000
+      internalID: -1930627063480314444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_6
+      rect:
+        serializedVersion: 2
+        x: 4397
+        y: 106
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3eb838834712f950800000000000000
+      internalID: 6481268392555232826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_7
+      rect:
+        serializedVersion: 2
+        x: 4429
+        y: 109
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62584f3a31b396bd0800000000000000
+      internalID: -2636511151307586266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_8
+      rect:
+        serializedVersion: 2
+        x: 4437
+        y: 109
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f7e2f54c94e707a0800000000000000
+      internalID: -6410904184699033614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_9
+      rect:
+        serializedVersion: 2
+        x: 4454
+        y: 106
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c83eff52349aa0090800000000000000
+      internalID: -8067449676615392372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_10
+      rect:
+        serializedVersion: 2
+        x: 4470
+        y: 103
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1402ea912210669a0800000000000000
+      internalID: -6240298987703885759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_11
+      rect:
+        serializedVersion: 2
+        x: 4473
+        y: 110
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a0595cd540809db0800000000000000
+      internalID: -4787185366356897624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_12
+      rect:
+        serializedVersion: 2
+        x: 4480
+        y: 112
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96e88003d9fb33bd0800000000000000
+      internalID: -2651565073754452375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_13
+      rect:
+        serializedVersion: 2
+        x: 4493
+        y: 92
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26fef1ccfb7943870800000000000000
+      internalID: 8661714833359499106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_14
+      rect:
+        serializedVersion: 2
+        x: 4516
+        y: 113
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a1ee3f00ba08fc20800000000000000
+      internalID: 3240351683179372961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_15
+      rect:
+        serializedVersion: 2
+        x: 4539
+        y: 87
+        width: 21
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01b59d34794173a40800000000000000
+      internalID: 5347765722436688656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_16
+      rect:
+        serializedVersion: 2
+        x: 4540
+        y: 114
+        width: 22
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d445cfbb61056bf0800000000000000
+      internalID: -331857435251358512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_17
+      rect:
+        serializedVersion: 2
+        x: 4572
+        y: 102
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 775cdd315067f1ac0800000000000000
+      internalID: -3882254589589863049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_18
+      rect:
+        serializedVersion: 2
+        x: 4573
+        y: 100
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c00630e9087eb4230800000000000000
+      internalID: 3624244864742547468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_19
+      rect:
+        serializedVersion: 2
+        x: 4612
+        y: 98
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecc956bf0f0040330800000000000000
+      internalID: 3676064230851058894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_20
+      rect:
+        serializedVersion: 2
+        x: 4630
+        y: 109
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb068ec18650917d0800000000000000
+      internalID: -2947318536417550148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_21
+      rect:
+        serializedVersion: 2
+        x: 4671
+        y: 113
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c853d82d3e8cf5b0800000000000000
+      internalID: -5333231465384421175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_22
+      rect:
+        serializedVersion: 2
+        x: 4714
+        y: 110
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a15337e95c990d900800000000000000
+      internalID: 707234215543125274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_23
+      rect:
+        serializedVersion: 2
+        x: 4720
+        y: 108
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff6d8355b5cc7e410800000000000000
+      internalID: 1506397293022598911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_24
+      rect:
+        serializedVersion: 2
+        x: 4762
+        y: 106
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06c730f584066bfe0800000000000000
+      internalID: -1173644788935459744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vendor NO SPARKLE_25
+      rect:
+        serializedVersion: 2
+        x: 4779
+        y: 102
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9aeb1e87989a71f60800000000000000
+      internalID: 8005053270578020009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vendor NO SPARKLE_0: 7395659847136304974
+      vendor NO SPARKLE_1: 6244426527860314684
+      vendor NO SPARKLE_10: -6240298987703885759
+      vendor NO SPARKLE_11: -4787185366356897624
+      vendor NO SPARKLE_12: -2651565073754452375
+      vendor NO SPARKLE_13: 8661714833359499106
+      vendor NO SPARKLE_14: 3240351683179372961
+      vendor NO SPARKLE_15: 5347765722436688656
+      vendor NO SPARKLE_16: -331857435251358512
+      vendor NO SPARKLE_17: -3882254589589863049
+      vendor NO SPARKLE_18: 3624244864742547468
+      vendor NO SPARKLE_19: 3676064230851058894
+      vendor NO SPARKLE_2: -2998479170910234530
+      vendor NO SPARKLE_20: -2947318536417550148
+      vendor NO SPARKLE_21: -5333231465384421175
+      vendor NO SPARKLE_22: 707234215543125274
+      vendor NO SPARKLE_23: 1506397293022598911
+      vendor NO SPARKLE_24: -1173644788935459744
+      vendor NO SPARKLE_25: 8005053270578020009
+      vendor NO SPARKLE_3: -3620446731668746080
+      vendor NO SPARKLE_4: 5850178845273215343
+      vendor NO SPARKLE_5: -1930627063480314444
+      vendor NO SPARKLE_6: 6481268392555232826
+      vendor NO SPARKLE_7: -2636511151307586266
+      vendor NO SPARKLE_8: -6410904184699033614
+      vendor NO SPARKLE_9: -8067449676615392372
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
