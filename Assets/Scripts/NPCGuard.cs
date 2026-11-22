@@ -660,6 +660,15 @@ public class NPCGuard : MonoBehaviour
     }
 
 
+    // Hit (even from behind): spin round to face Narcissus straight away.
+    public void TurnToPlayer()
+    {
+        if (player == null) return;
+        Vector2 d = (Vector2)player.position - rb.position;
+        FaceDirection(d);
+        if (spriteAnim != null) spriteAnim.Face(d);
+    }
+
     void FaceDirection(Vector2 direction)
     {
         if (direction.sqrMagnitude < 0.0001f)

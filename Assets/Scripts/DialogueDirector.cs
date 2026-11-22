@@ -84,6 +84,7 @@ public class DialogueDirector : MonoBehaviour
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
         Stolen = Item.None;
+        MoveScale = 1f;   // a restart can come mid-freeze
     }
 
     // ---- Easing into the freeze ----

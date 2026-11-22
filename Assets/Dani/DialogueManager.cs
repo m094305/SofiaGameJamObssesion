@@ -158,7 +158,10 @@ public class DialogueManager : MonoBehaviour
 
         if (characterNameText != null)
         {
-            characterNameText.text = currentLine.characterName;
+            // The main character's name is for the player to work out - never shown.
+            string shownName = currentLine.characterName ?? string.Empty;
+            if (shownName.ToLowerInvariant().Contains("narcis")) shownName = "???";
+            characterNameText.text = shownName;
         }
 
         ApplyTextSideLayout(currentLine.side);

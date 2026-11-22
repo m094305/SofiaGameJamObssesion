@@ -54,8 +54,20 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    [Header("Game over")]
+    [Tooltip("Seconds after dying before \"Press A to try again\" appears and works.")]
+    public float retryDelay = 1.5f;
+
+    bool CanRetry => IsDead && Time.time - diedAt >= retryDelay;
+
     void Update()
     {
+        if (CanRetry && GameFlow.AnyButtonPressed())
+        {
+            GameFlow.Restart();
+            return;
+        }
+
         // Blink while invulnerable.
         bool blinking = !IsDead && Time.time < invulnerableUntil;
         bool visible = !blinking || Mathf.Repeat(Time.time * 10f, 1f) < 0.5f;
@@ -64,9 +76,26 @@ public class PlayerHealth : MonoBehaviour
                 sr.enabled = visible;
     }
 
+    float diedAt;
+    GUIStyle gameOverStyle, retryStyle;
+    static Texture2D buttonCircle;
+
+    static Texture2D MakeCircle()
+    {
+        const int n = 64;
+        var t = new Texture2D(n, n, TextureFormat.RGBA32, false);
+        float r = n * 0.5f;
+        for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+                t.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Clamp01(r - Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)))));
+        t.Apply();
+        return t;
+    }
+
     void Die()
     {
         IsDead = true;
+        diedAt = Time.time;
 
         Debug.Log("GAME OVER!");
 
@@ -82,6 +111,7 @@ public class PlayerHealth : MonoBehaviour
 
     void OnGUI()
     {
+        if (TitleScreen.Showing || DeathCutscene.Playing) return;   // nothing over the title or cutscene pictures
         MakeHeartTextures();
 
         float scale = Screen.height / 1080f;
@@ -100,15 +130,62 @@ public class PlayerHealth : MonoBehaviour
 
         if (IsDead)
         {
-            GUI.Box(
-                new Rect(
-                    Screen.width / 2f - 90,
-                    Screen.height / 2f - 25,
-                    180,
-                    50
-                ),
-                "GAME OVER"
-            );
+            // Big red GAME OVER over a dark band, fading in.
+            float a = Mathf.Clamp01((Time.time - diedAt) / 0.8f);
+            float sc = Screen.height / 720f;
+            Color old = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.55f * a);
+            GUI.DrawTexture(new Rect(0f, Screen.height * 0.5f - 85f * sc, Screen.width, 170f * sc), Texture2D.whiteTexture);
+            if (gameOverStyle == null)
+                gameOverStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+            gameOverStyle.fontSize = Mathf.RoundToInt(96f * sc);
+            Rect r = new Rect(0f, Screen.height * 0.5f - 70f * sc, Screen.width, 140f * sc);
+            gameOverStyle.normal.textColor = new Color(0f, 0f, 0f, 0.9f * a);
+            GUI.color = Color.white;
+            GUI.Label(new Rect(r.x + 4f * sc, r.y + 4f * sc, r.width, r.height), "GAME OVER", gameOverStyle);
+            gameOverStyle.normal.textColor = new Color(0.86f, 0.08f, 0.08f, a);
+            GUI.Label(r, "GAME OVER", gameOverStyle);
+
+            // "Press (A) to try again", pulsing, once it's allowed.
+            if (CanRetry)
+            {
+                float pa = Mathf.Clamp01((Time.time - diedAt - retryDelay) / 0.5f) *
+                           (0.65f + 0.35f * (0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f)));
+                if (retryStyle == null)
+                    retryStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, fontStyle = FontStyle.Bold };
+                retryStyle.fontSize = Mathf.RoundToInt(26f * sc);
+                string before = "Press", after = "to try again";
+                float wb = retryStyle.CalcSize(new GUIContent(before)).x;
+                float wa = retryStyle.CalcSize(new GUIContent(after)).x;
+                float d = 32f * sc, gap = 10f * sc;
+                float total = wb + gap + d + gap + wa;
+                float x = Screen.width * 0.5f - total * 0.5f;
+                float y = Screen.height * 0.5f + 115f * sc;
+                Rect rb = new Rect(x, y - 16f * sc, wb, 32f * sc);
+                Rect ra = new Rect(x + wb + gap + d + gap, y - 16f * sc, wa, 32f * sc);
+                retryStyle.normal.textColor = new Color(0f, 0f, 0f, 0.85f * pa);
+                GUI.Label(new Rect(rb.x + 2f * sc, rb.y + 2f * sc, rb.width, rb.height), before, retryStyle);
+                GUI.Label(new Rect(ra.x + 2f * sc, ra.y + 2f * sc, ra.width, ra.height), after, retryStyle);
+                retryStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f, pa);
+                GUI.Label(rb, before, retryStyle);
+                GUI.Label(ra, after, retryStyle);
+
+                // The red A button.
+                if (buttonCircle == null) buttonCircle = MakeCircle();
+                Color bc = new Color(0.86f, 0.22f, 0.22f);
+                Rect b = new Rect(x + wb + gap, y - d * 0.5f, d, d);
+                GUI.color = new Color(0f, 0f, 0f, 0.6f * pa);
+                GUI.DrawTexture(new Rect(b.x + 2f * sc, b.y + 2.5f * sc, d, d), buttonCircle);
+                GUI.color = new Color(bc.r * 0.6f, bc.g * 0.6f, bc.b * 0.6f, pa);
+                GUI.DrawTexture(b, buttonCircle);
+                GUI.color = new Color(bc.r, bc.g, bc.b, pa);
+                GUI.DrawTexture(new Rect(b.x + 2.5f * sc, b.y + 2f * sc, d - 5f * sc, d - 6f * sc), buttonCircle);
+                GUI.color = Color.white;
+                var bs = new GUIStyle(retryStyle) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.RoundToInt(19f * sc) };
+                bs.normal.textColor = new Color(1f, 1f, 1f, pa);
+                GUI.Label(new Rect(b.x, b.y - 1f * sc, d, d), "A", bs);
+            }
+            GUI.color = old;
         }
     }
 

@@ -10,6 +10,7 @@ public class ArcadeButtons : MonoBehaviour
 
     private PlayerInventory inventory;
     private PlayerHealth health;
+    private PlayerInteraction lake;
 
     void Awake()
     {
@@ -47,6 +48,17 @@ public class ArcadeButtons : MonoBehaviour
         if (health == null) health = FindAnyObjectByType<PlayerHealth>();
         if (health != null && health.IsDead)
             return;
+
+        // At the lake with the ending ready: the pick-up or the attack button looks into the water.
+        if (PlayerInteraction.AtLake &&
+            ((buttonA != null && buttonA.action.WasPressedThisFrame()) ||
+             (buttonB != null && buttonB.action.WasPressedThisFrame())))
+        {
+            if (lake == null) lake = GetComponentInParent<PlayerInteraction>();
+            if (lake == null) lake = FindAnyObjectByType<PlayerInteraction>();
+            if (lake != null) lake.Interact();
+            return;
+        }
 
         // A - PICK UP / SWITCH
         if (buttonA != null &&

@@ -19,6 +19,8 @@ public class DeathCutscene : MonoBehaviour
         [Range(0.3f, 1f)] public float screenHeight = 1f;
         [Tooltip("Where the top of the shot sits on screen (1 = top edge; lower moves the shot down).")]
         [Range(0.3f, 1f)] public float screenTop = 1f;
+        [Tooltip("How long this shot stays up, in seconds (0 = the cutscene's Shot Duration).")]
+        public float duration = 0f;
 
         [Header("Zoom")]
         [Tooltip("Scale at the start of the shot (>1 = starts zoomed in).")]
@@ -59,13 +61,34 @@ public class DeathCutscene : MonoBehaviour
         [Header("Cut")]
         [Tooltip("End this shot with a white flash straight into the next one (instead of fading to black).")]
         public bool flashOut;
+        [Tooltip("Colour of that flash (leave alpha at 0 to use the cutscene's Flash Color).")]
+        public Color flashOutColor = new Color(1f, 1f, 1f, 0f);
+        [Tooltip("Seconds to dissolve in over the previous picture instead of going through black " +
+                 "(for pictures drawn the same, e.g. a shadow appearing). 0 = off.")]
+        public float blendIn = 0f;
+        [Tooltip("Optional: music that starts when this picture appears (stops everything else).")]
+        public AudioClip music;
+        [Tooltip("Optional: a sound played once when this picture appears (over the music).")]
+        public AudioClip sound;
+        [Tooltip("Optional: lines that type out over this picture (it waits for them).")]
+        public List<DialogueLine> lines = new List<DialogueLine>();
     }
+
+    [Header("Ending")]
+    [Tooltip("The game's ending: stay on black when the pictures are done (the end screen takes over).")]
+    public bool endsGame = false;
+    public bool Finished { get; private set; }
+
+    Image blendImage;
+
+    Color FlashColorOf(Shot s) => s != null && s.flashOutColor.a > 0f ? s.flashOutColor : flashColor;
 
     [Header("Shots (played in order)")]
     public Shot[] shots;
 
     [Header("Timing")]
     public float shotDuration = 5f;
+    float ShotTime => current != null && current.duration > 0f ? current.duration : shotDuration;
     public float fadeTime = 0.6f;
     [Tooltip("White flash at the moment of the kill; it fades straight into the first shot.")]
     public bool flashOnStart = true;
@@ -126,11 +149,41 @@ public class DeathCutscene : MonoBehaviour
             bool last = i == shots.Length - 1;
             current = shots[i];
             ShowShot(current);
+            if (current.music != null) AudioManager.PlayEnding(current.music);
+            if (current.sound != null) AudioManager.PlaySFX(current.sound);
             float t = 0f;
             Zoom(0f);
 
             bool flashIn = i == 0 ? flashOnStart : shots[i - 1].flashOut;
-            if (i == 0 && straightIn)
+            bool nextBlends = !last && shots[i + 1].blendIn > 0f;
+            if (i > 0 && current.blendIn > 0f && !flashIn)
+            {
+                // Dissolve: the previous picture stays underneath while this one fades in on top.
+                shotImage.sprite = shots[i - 1].image;
+                if (blendImage == null)
+                {
+                    var go = new GameObject("Blend", typeof(RectTransform));
+                    go.transform.SetParent(shotRect, false);
+                    blendImage = go.AddComponent<Image>();
+                    blendImage.raycastTarget = false;
+                    RectTransform rt = blendImage.rectTransform;
+                    rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+                    rt.offsetMin = rt.offsetMax = Vector2.zero;
+                }
+                blendImage.gameObject.SetActive(true);
+                blendImage.sprite = current.image;
+                SetFade(0f);
+                for (float f = 0f; f < current.blendIn; f += Time.deltaTime)
+                {
+                    t += Time.deltaTime; Zoom(t);
+                    float k = f / current.blendIn;
+                    blendImage.color = new Color(1f, 1f, 1f, k * k * (3f - 2f * k));
+                    yield return null;
+                }
+                shotImage.sprite = current.image;
+                blendImage.gameObject.SetActive(false);
+            }
+            else if (i == 0 && straightIn)
             {
                 // game -> shot directly, a semi-quick fade (the whole cutscene screen fades in).
                 CanvasGroup group = screen.GetComponent<CanvasGroup>();
@@ -147,7 +200,7 @@ public class DeathCutscene : MonoBehaviour
             else if (flashIn)
             {
                 // The hit lands: flash, and the shot appears out of it (already zooming).
-                SetFadeColor(flashColor);
+                SetFadeColor(i == 0 ? flashColor : FlashColorOf(shots[i - 1]));
                 SetFade(1f);
                 for (float f = 0f; f < flashTime; f += Time.deltaTime)
                 {
@@ -170,26 +223,32 @@ public class DeathCutscene : MonoBehaviour
             SetFade(0f);
             SetFadeColor(Color.black);
 
-            if (last && lines != null && lines.Count > 0)
+            // Lines over this picture: its own, or (on the last picture) the ones the cutscene was played with.
+            List<DialogueLine> shotLines = current.lines != null && current.lines.Count > 0 ? current.lines : (last ? lines : null);
+            if (shotLines != null && shotLines.Count > 0)
             {
-                // The death lines type out over this shot; hold it until they're done.
-                DialogueDirector.Instance.Play(WithoutPortraits(lines), null, noPortrait);
+                // The lines type out over this shot; hold it until they are done.
+                DialogueDirector.Instance.Play(WithoutPortraits(shotLines), null, noPortrait);
                 float waitStart = Time.time;
                 while (!DialogueManager.AnyDialogueActive && Time.time - waitStart < 2f)
                 { t += Time.deltaTime; Zoom(t); yield return null; }
-                while (DialogueManager.AnyDialogueActive || t < shotDuration - fadeTime)
+                while (DialogueManager.AnyDialogueActive || t < ShotTime - fadeTime)
                 { t += Time.deltaTime; Zoom(t); yield return null; }
             }
             else
             {
-                while (t < shotDuration - fadeTime)
+                while (t < ShotTime - fadeTime)
                 { t += Time.deltaTime; Zoom(t); yield return null; }
             }
 
+            if (nextBlends && !current.flashOut)
+            {
+                continue;   // the next picture dissolves in over this one
+            }
             if (current.flashOut && !last)
             {
                 // shot -> white flash (the next shot comes out of it)
-                SetFadeColor(flashColor);
+                SetFadeColor(FlashColorOf(current));
                 for (float f = 0f; f < flashRise; f += Time.deltaTime)
                 {
                     t += Time.deltaTime; Zoom(t); SetFade(f / flashRise);
@@ -210,6 +269,14 @@ public class DeathCutscene : MonoBehaviour
         if (overlayImage != null) overlayImage.gameObject.SetActive(false);
 
         screen.SetActive(false);
+        if (endsGame)
+        {
+            // The end: stay on black, world held; the end screen takes it from here.
+            SetFadeColor(Color.black);
+            SetFade(1f);
+            Finished = true;
+            yield break;
+        }
         yield return Fade(1f, 0f);                       // black -> game
         fade.gameObject.SetActive(false);
 
@@ -262,7 +329,7 @@ public class DeathCutscene : MonoBehaviour
     void MoveOverlay(float t)
     {
         if (current == null || current.overlay == null || overlayImage == null) return;
-        float walkTime = Mathf.Max(0.01f, shotDuration - fadeTime);
+        float walkTime = Mathf.Max(0.01f, ShotTime - fadeTime);
         float p = Mathf.Clamp01(t / walkTime);
         float travel = p * p * (3f - 2f * p);
         float stepPhase = p * Mathf.Max(1, current.walkSteps) * Mathf.PI;
@@ -281,7 +348,7 @@ public class DeathCutscene : MonoBehaviour
     void Zoom(float t)
     {
         if (current == null) return;
-        float k = Mathf.Clamp01(t / Mathf.Max(0.01f, shotDuration));
+        float k = Mathf.Clamp01(t / Mathf.Max(0.01f, ShotTime));
         float eased = current.zoomEaseOut
             ? 1f - (1f - k) * (1f - k) * (1f - k)
             : k * k * (3f - 2f * k);

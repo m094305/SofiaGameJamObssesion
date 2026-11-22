@@ -26,18 +26,28 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
+    // True while standing at the lake with the ending ready (read by ArcadeButtons and ControlHints).
+    public static bool AtLake { get; private set; }
+    public Vector3 LakePosition => endingObject != null ? endingObject.transform.position : transform.position;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() { AtLake = false; }
+
+    void OnDisable() { AtLake = false; }
+
     void Update()
     {
-        bool inRange = IsInRange() && !DialogueManager.InputBlocked && !DialogueDirector.Freezing;
+        bool inRange = IsInRange() && !DialogueManager.InputBlocked && !DialogueDirector.Freezing &&
+                       !TitleScreen.Showing;
+        // The lake has something to show (the ending is ready): A uses it instead of attacking.
+        AtLake = inRange && endingObject.EndingReady;
 
-        if (interactButton != null &&
-            interactButton.gameObject.activeSelf != inRange)
-        {
-            interactButton.gameObject.SetActive(inRange);
-        }
+        // The on-screen "A  Look into the lake" prompt (ControlHints) replaces the old UI button.
+        if (interactButton != null && interactButton.gameObject.activeSelf)
+            interactButton.gameObject.SetActive(false);
 
-        // Was keyboard E only; now also J, arcade button 2 and gamepad X.
-        if (inRange && GameInput.InteractPressed)
+        // The A button (arcade trigger / K / gamepad A), or E.
+        if (AtLake && GameInput.LakePressed)
             Interact();
     }
 

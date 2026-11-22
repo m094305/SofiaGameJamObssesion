@@ -49,6 +49,7 @@ public class AudioManager : MonoBehaviour
 
     AudioSource fightSource, lakeSource, stepSource;
     bool openingDone;
+    bool toTheme;          // fading the title song out, then the main theme
     bool gameOver;
     AudioClip deathSong;          // the fight song held through a death cutscene
     NPCGuard[] guards;
@@ -100,10 +101,12 @@ public class AudioManager : MonoBehaviour
 
         // Opening song first (once), then the main theme loops.
         musicSource.volume = musicVolume;
-        if (Opening_song_before_main_theme != null)
+        if (Opening_song_before_main_theme != null && !GameFlow.Retrying)   // a retry goes straight to the theme
         {
             musicSource.clip = Opening_song_before_main_theme;
-            musicSource.loop = false;
+            // On the title screen it loops until the game starts.
+            musicSource.loop = TitleScreen.Showing;
+            if (TitleScreen.Showing) openingDone = true;
         }
         else StartMainTheme();
         musicSource.Play();
@@ -124,6 +127,13 @@ public class AudioManager : MonoBehaviour
         float dt = Time.unscaledDeltaTime;
 
         // Opening -> main theme.
+        if (toTheme && musicSource.volume <= 0.001f)
+        {
+            toTheme = false;
+            StartMainTheme();
+            musicSource.Play();
+        }
+
         if (!openingDone && !musicSource.isPlaying && !gameOver && Main_theme_extended != null)
         {
             StartMainTheme();
@@ -161,7 +171,7 @@ public class AudioManager : MonoBehaviour
         if (fightSource.isPlaying && fight == null && fightSource.volume <= 0.001f) { fightSource.Stop(); fightSource.clip = null; }
 
         // The theme ducks under a fight song (keeps playing underneath).
-        float musicTarget = gameOver ? musicVolume : (fight != null ? 0f : musicVolume);
+        float musicTarget = toTheme || musicFadeOut ? 0f : gameOver ? musicVolume : (fight != null ? 0f : musicVolume);
         musicSource.volume = Mathf.MoveTowards(musicSource.volume, musicTarget, dt * musicVolume / crossfadeTime);
 
         // Lake ambience by distance.
@@ -169,7 +179,7 @@ public class AudioManager : MonoBehaviour
         {
             float d = Vector2.Distance(player.position, lake.position);
             float t = 1f - Mathf.InverseLerp(lakeNear, lakeFar, d);
-            lakeSource.volume = gameOver ? 0f : lakeVolume * t * t;
+            lakeSource.volume = lakeOnly ? Mathf.MoveTowards(lakeSource.volume, lakeVolume, dt * 0.5f) : gameOver ? 0f : lakeVolume * t * t;
         }
 
         UpdateFootsteps(dt);
@@ -235,6 +245,44 @@ public class AudioManager : MonoBehaviour
         if (walking && !stepSource.isPlaying) stepSource.Play();
         stepSource.volume = Mathf.MoveTowards(stepSource.volume, walking ? footstepVolume : 0f, dt * 6f);
         if (!walking && stepSource.isPlaying && stepSource.volume <= 0.001f) stepSource.Pause();
+    }
+
+    // The ending: everything else stops, this clip plays once.
+    public static void PlayEnding(AudioClip clip)
+    {
+        if (Instance == null || clip == null) return;
+        Instance.gameOver = true;   // no fight songs, no lake, no footsteps from here on
+        Instance.toTheme = false;
+        Instance.fightSource.Stop();
+        Instance.stepSource.Stop();
+        Instance.musicSource.clip = clip;
+        Instance.musicSource.loop = false;
+        Instance.musicSource.volume = Instance.musicVolume;
+        Instance.musicSource.Play();
+        Instance.musicFadeOut = false;
+        Instance.openingDone = true;
+    }
+
+    public static AudioClip EndingKilledAtLake => Instance != null ? Instance.Killed_at_lake_ending : null;
+
+    // The ending begins at the lake: the music fades away and only the water is heard.
+    public static void QuietForEnding()
+    {
+        if (Instance == null) return;
+        Instance.gameOver = true;
+        Instance.lakeOnly = true;
+        Instance.fightSource.Stop();
+        Instance.stepSource.Stop();
+        Instance.musicFadeOut = true;
+    }
+
+    bool lakeOnly, musicFadeOut;
+
+    // The title screen was dismissed: fade the opening song out and start the main theme.
+    public static void BeginGameMusic()
+    {
+        if (Instance == null || Instance.musicSource.clip == Instance.Main_theme_extended) return;
+        Instance.toTheme = true;
     }
 
     public static void PlaySFX(AudioClip clip, float volume = 1f)

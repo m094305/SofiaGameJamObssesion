@@ -17,8 +17,25 @@ public class Collectible : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics() { all.Clear(); collected.Clear(); }
 
+    // A new attempt ("try again"): nothing picked up yet.
+    public static void ResetForNewRun() { collected.Clear(); }
+
     void OnEnable() { all.Add(this); }
     void OnDisable() { all.Remove(this); }
+
+    // The closest collectible still lying around within range (for the "pick up" prompt), or null.
+    public static Collectible NearestTo(Vector2 position, float range)
+    {
+        Collectible best = null;
+        float bestD = range;
+        foreach (Collectible c in all)
+        {
+            if (c == null || !c.isActiveAndEnabled) continue;
+            float d = Vector2.Distance(position, c.transform.position);
+            if (d <= bestD) { bestD = d; best = c; }
+        }
+        return best;
+    }
 
     // Picks up the nearest collectible in range. Returns true if one was picked up.
     public static bool TryCollectNear(Vector2 position, float range)

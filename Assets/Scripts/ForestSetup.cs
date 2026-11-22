@@ -46,7 +46,7 @@ public class ForestSetup : MonoBehaviour
     static bool bootstrapped;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void AutoCreate()
+    public static void AutoCreate()
     {
         if (bootstrapped || FindAnyObjectByType<ForestSetup>() != null)
             return;

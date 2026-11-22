@@ -125,6 +125,7 @@ public class GuardHealth : MonoBehaviour
         {
             if (dialogue != null) dialogue.OnAttacked();
             guard.BecomeHostile();
+            guard.TurnToPlayer();   // even a hit from behind makes it look round at you
         }
     }
 }

@@ -26,6 +26,27 @@ public static class GameInput
 
     static InputAction interact;
 
+    // The A button (arcade trigger / K / gamepad A) plus E: uses the lake.
+    public static readonly string[] LakeBindings =
+    {
+        "<Joystick>/trigger", "<Keyboard>/k", "<Gamepad>/buttonSouth", "<Keyboard>/e",
+    };
+    static InputAction lake;
+
+    public static bool LakePressed
+    {
+        get
+        {
+            if (lake == null)
+            {
+                lake = new InputAction("Lake", InputActionType.Button);
+                foreach (string b in LakeBindings) lake.AddBinding(b);
+                lake.Enable();
+            }
+            return lake.WasPressedThisFrame();
+        }
+    }
+
     // True on the frame any interact button is pressed.
     public static bool InteractPressed
     {
