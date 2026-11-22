@@ -7,6 +7,8 @@ public class Collectible : MonoBehaviour
 {
     [Tooltip("Shown in the inventory once picked up.")]
     public string inventoryText = "- A narcissus flower";
+    [Tooltip("Optional: still-picture cutscene played when this is picked up (e.g. plucking the flower).")]
+    public DeathCutscene pickupCutscene;
 
     static readonly List<Collectible> all = new List<Collectible>();
     static readonly List<string> collected = new List<string>();
@@ -51,6 +53,8 @@ public class Collectible : MonoBehaviour
 
         collected.Add(best.inventoryText);
         best.gameObject.SetActive(false);
+        if (best.pickupCutscene != null && !DeathCutscene.Playing)
+            best.pickupCutscene.Play(null);
         return true;
     }
 }
