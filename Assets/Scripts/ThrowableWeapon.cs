@@ -218,6 +218,7 @@ public class ThrowableWeapons : MonoBehaviour
         }
 
         IsFlying = false;
+        AudioManager.PlayRock();     // hits someone, a wall or the ground
         if (!Used) SetGlint(true);   // lying on the ground again
 
         // A miss clatters to the ground: NPCs nearby get suspicious and look over.

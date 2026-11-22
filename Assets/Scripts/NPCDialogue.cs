@@ -14,7 +14,7 @@ public class NPCDialogue : MonoBehaviour
     public GameObject portrait;
     [Tooltip("What Narcissus takes from this NPC when it dies (changes his portrait).")]
     public DialogueDirector.Item stolenItems;
-    public enum KillWeapon { Thrown, Melee }
+    public enum KillWeapon { Thrown, Melee, Fists }
 
     [Tooltip("Optional: plays instead of the plain death text when killed without being seen, by the weapon below.")]
     public DeathCutscene deathCutscene;
@@ -39,11 +39,20 @@ public class NPCDialogue : MonoBehaviour
 
     public bool HasDeathCutscene => deathCutscene != null;
 
-    // Unseen, and with the weapon this NPC's cutscene is made for.
-    public bool IsCutsceneKill(bool stealth, bool fromThrow)
+    // Knight/merchant: unseen, with the weapon their cutscene is made for.
+    // Grandma (Fists): a punch she sees, once the fight has brought Narcissus down to his last heart.
+    public bool IsCutsceneKill(bool stealth, KillWeapon weapon)
     {
-        bool rightWeapon = fromThrow == (cutsceneWeapon == KillWeapon.Thrown);
-        return stealth && rightWeapon && deathCutscene != null;
+        if (deathCutscene == null || weapon != cutsceneWeapon) return false;
+        if (weapon == KillWeapon.Fists)
+        {
+            // Only if Narcissus started it with a sneak punch; a fair fight can't be won.
+            GuardHealth gh = GetComponent<GuardHealth>();
+            if (gh == null || !gh.Ambushed) return false;
+            PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
+            return !stealth && ph != null && ph.CurrentHealth <= 1;
+        }
+        return stealth;
     }
 
     bool spotted, greeted, attackedPlayed, deathPlayed;
@@ -98,7 +107,7 @@ public class NPCDialogue : MonoBehaviour
     // Called by GuardHealth right before the NPC is removed.
     // stealth: killed without being seen; fromThrow: by a thrown item (else melee).
     // An unseen kill with this NPC's cutscene weapon plays its death cutscene.
-    public void OnKilled(bool stealth = false, bool fromThrow = false)
+    public void OnKilled(bool stealth = false, KillWeapon weapon = KillWeapon.Melee)
     {
         WasAttacked = true;
         DialogueDirector.Instance.CancelPending(transform);
@@ -110,8 +119,11 @@ public class NPCDialogue : MonoBehaviour
             foreach (GameObject go in revealOnDeath)
                 if (go != null) go.SetActive(true);
 
-        if (IsCutsceneKill(stealth, fromThrow))
+        if (IsCutsceneKill(stealth, weapon))
+        {
             deathCutscene.Play(deathLines);      // the shots, with the death lines over the last one
+            AudioManager.PlayDeathSong(name);    // its fight song plays over its death
+        }
         else
             Play(deathLines);
     }

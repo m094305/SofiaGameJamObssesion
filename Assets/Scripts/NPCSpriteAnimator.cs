@@ -104,6 +104,12 @@ public class NPCSpriteAnimator : MonoBehaviour
         Show(0);
     }
 
+    // The way it's facing right now (used to lay its corpse down that way).
+    public Vector2 FacingDir =>
+        current == up ? Vector2.up :
+        current == left ? Vector2.left :
+        current == right ? Vector2.right : Vector2.down;
+
     void Show(int i)
     {
         if (current == null || current.Length == 0) return;

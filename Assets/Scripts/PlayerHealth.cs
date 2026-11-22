@@ -44,6 +44,7 @@ public class PlayerHealth : MonoBehaviour
         CurrentHealth = Mathf.Max(0, CurrentHealth - 1);
         invulnerableUntil = Time.time + invulnerableTime;
         lostHeartTime = Time.time;
+        AudioManager.PlayPunch();
 
         Debug.Log("Player hearts: " + CurrentHealth + "/" + maxHealth);
 

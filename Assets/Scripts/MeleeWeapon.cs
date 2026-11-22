@@ -105,6 +105,7 @@ public class MeleeWeapons : MonoBehaviour
             return;
 
         nextAttackTime = Time.time + attackCooldown;
+        AudioManager.PlayKnife();
 
         StartCoroutine(SwingRoutine(player, direction));
     }

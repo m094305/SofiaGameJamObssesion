@@ -55,6 +55,8 @@ public class NPCGuard : MonoBehaviour
     public float attackStopDistance = 1.1f;
     public int punchDamage = 20;
     public float punchDelay = 0.5f;
+    [Tooltip("Her punches never take Narcissus' last heart (the grandma: the fist fight always ends on 1 heart).")]
+    public bool spareLastHeart = false;
 
     [Header("Interaction")]
     public float interactionDistance = 1.5f;
@@ -159,8 +161,11 @@ public class NPCGuard : MonoBehaviour
     private bool inDialogue;
     private Vector2 dialogueStartVelocity;
 
+    GuardHealth health;
+
     void Awake()
     {
+        health = GetComponentInChildren<GuardHealth>();
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
@@ -602,6 +607,10 @@ public class NPCGuard : MonoBehaviour
             return;
 
         nextPunchTime = Time.time + punchDelay;
+        // Ambushed: too shaken to finish him. A fair fight (she saw it coming) - no mercy.
+        if (spareLastHeart && playerHealth.CurrentHealth <= 1 &&
+            health != null && health.Ambushed)
+            return;
         playerHealth.TakeDamage(punchDamage);
         Debug.Log(name + ": PUNCH! (-1 heart)");
     }

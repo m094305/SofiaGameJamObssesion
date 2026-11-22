@@ -48,6 +48,14 @@ public class DeathCutscene : MonoBehaviour
         [Tooltip("Side-to-side tilt per step, in degrees.")]
         public float walkSway = 3f;
 
+        [Header("Shake (optional)")]
+        [Tooltip("How hard the shot shakes, as a fraction of its height (0 = still).")]
+        public float shake = 0f;
+        [Tooltip("Seconds the shake takes to die down.")]
+        public float shakeTime = 1.2f;
+        [Tooltip("A faint tremble that stays after the shake (fraction of the shake), e.g. struggling.")]
+        [Range(0f, 1f)] public float shakeHold = 0f;
+
         [Header("Cut")]
         [Tooltip("End this shot with a white flash straight into the next one (instead of fading to black).")]
         public bool flashOut;
@@ -65,6 +73,10 @@ public class DeathCutscene : MonoBehaviour
     public float flashTime = 0.5f;
     [Tooltip("How fast the screen goes white on a flash cut.")]
     public float flashRise = 0.08f;
+    [Tooltip("When there is no flash: fade straight from the game into the first shot (instead of via black).")]
+    public bool fadeStraightIn = false;
+    [Tooltip("How long that fade-in takes.")]
+    public float startFadeTime = 0.35f;
 
     [Header("UI (built under the Canvas)")]
     public GameObject screen;          // black backdrop + shot, hidden when not playing
@@ -95,7 +107,13 @@ public class DeathCutscene : MonoBehaviour
         DialogueDirector.HoldForCutscene(true);
 
         fade.gameObject.SetActive(true);
-        if (!flashOnStart)
+        bool straightIn = !flashOnStart && fadeStraightIn;
+        if (straightIn)
+        {
+            SetFadeColor(Color.black);
+            SetFade(0f);
+        }
+        else if (!flashOnStart)
         {
             SetFadeColor(Color.black);
             SetFade(0f);
@@ -112,7 +130,21 @@ public class DeathCutscene : MonoBehaviour
             Zoom(0f);
 
             bool flashIn = i == 0 ? flashOnStart : shots[i - 1].flashOut;
-            if (flashIn)
+            if (i == 0 && straightIn)
+            {
+                // game -> shot directly, a semi-quick fade (the whole cutscene screen fades in).
+                CanvasGroup group = screen.GetComponent<CanvasGroup>();
+                if (group == null) group = screen.AddComponent<CanvasGroup>();
+                for (float f = 0f; f < startFadeTime; f += Time.deltaTime)
+                {
+                    t += Time.deltaTime; Zoom(t);
+                    float k = f / startFadeTime;
+                    group.alpha = k * k * (3f - 2f * k);
+                    yield return null;
+                }
+                group.alpha = 1f;
+            }
+            else if (flashIn)
             {
                 // The hit lands: flash, and the shot appears out of it (already zooming).
                 SetFadeColor(flashColor);
@@ -255,7 +287,21 @@ public class DeathCutscene : MonoBehaviour
             : k * k * (3f - 2f * k);
         float s = Mathf.Lerp(current.zoomFrom, current.zoomTo, eased);
         shotRect.localScale = new Vector3(s, s, 1f);
+        Shake(t);
         MoveOverlay(t);
+    }
+
+    // Jolts hard at the start of the shot and dies down (to a faint tremble if shakeHold > 0).
+    void Shake(float t)
+    {
+        if (current == null || current.shake <= 0f) { shotRect.anchoredPosition = Vector2.zero; return; }
+        float k = Mathf.Clamp01(t / Mathf.Max(0.01f, current.shakeTime));
+        float strength = Mathf.Lerp(1f, current.shakeHold, k * (2f - k));
+        float amp = current.shake * strength * shotRect.rect.height;
+        float n = Time.unscaledTime * 22f;
+        shotRect.anchoredPosition = new Vector2(
+            (Mathf.PerlinNoise(n, 0.3f) - 0.5f) * 2f * amp,
+            (Mathf.PerlinNoise(0.7f, n) - 0.5f) * 2f * amp);
     }
 
     void SetFadeColor(Color c)

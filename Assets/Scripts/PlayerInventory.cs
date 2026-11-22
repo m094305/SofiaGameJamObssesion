@@ -17,6 +17,12 @@ public class PlayerInventory : MonoBehaviour
     public ThrowableWeapons throwableWeapons;
     public MeleeWeapons meleeWeapons;
 
+    [Header("Fists (B with empty hands)")]
+    public int fistDamage = 25;
+    public float fistReach = 0.75f;
+    public float fistRadius = 0.55f;
+    public float fistCooldown = 0.45f;
+
     [Header("Settings")]
     public float pickupRange = 2f;
     public float dropDistance = 0.7f;
@@ -86,7 +92,10 @@ public class PlayerInventory : MonoBehaviour
 
         // Little things (the flower) go straight into the inventory, hands stay as they are.
         if (Collectible.TryCollectNear(position, pickupRange * 0.6f))
+        {
+            AudioManager.PlayPickup();
             return;
+        }
 
         bool canPickupRanged =
             throwableWeapons != null &&
@@ -141,6 +150,7 @@ public class PlayerInventory : MonoBehaviour
 
         equippedWeapon = selected;
 
+        AudioManager.PlayPickup();
         Debug.Log("EQUIPPED: " + equippedWeapon);
     }
 
@@ -219,8 +229,89 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            Debug.Log("Inventory is empty!");
+            // Empty hands: punch.
+            Punch();
         }
+    }
+
+    float nextPunchTime;
+    static Sprite impactSprite;
+
+    // A bare-handed jab in front of Narcissus. Weak - only the grandma can be beaten this way
+    // (her choke cutscene); the knight and merchant can't be killed by fists.
+    void Punch()
+    {
+        if (Time.time < nextPunchTime) return;
+        nextPunchTime = Time.time + fistCooldown;
+
+        Vector2 dir = facingDirection.sqrMagnitude > 0.01f ? facingDirection.normalized : Vector2.down;
+        // Snap to the 4 directions the animation has.
+        dir = Mathf.Abs(dir.x) > Mathf.Abs(dir.y) ? new Vector2(Mathf.Sign(dir.x), 0f) : new Vector2(0f, Mathf.Sign(dir.y));
+
+        PlayerPunchAnimation anim = player.GetComponent<PlayerPunchAnimation>();
+        if (anim != null)
+        {
+            anim.Play(dir);
+            StartCoroutine(LandPunchAfter(anim.TimeToImpact, dir));   // the hit lands on the strike frame
+        }
+        else LandPunch(dir);
+    }
+
+    System.Collections.IEnumerator LandPunchAfter(float delay, Vector2 dir)
+    {
+        yield return new WaitForSeconds(delay);
+        LandPunch(dir);
+    }
+
+    void LandPunch(Vector2 dir)
+    {
+        Vector2 from = player.position;
+        Vector2 at = from + dir * fistReach;
+        LayerMask walls = meleeWeapons != null ? meleeWeapons.wallLayer : (LayerMask)LayerMask.GetMask("Walls");
+
+        GuardHealth target = null;
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(at, fistRadius))
+        {
+            if (hit.isTrigger) continue;
+            GuardHealth g = hit.GetComponentInParent<GuardHealth>();
+            if (g == null || g.currentHealth <= 0) continue;
+            if (walls.value != 0 && Physics2D.Linecast(from, hit.bounds.center, walls).collider != null) continue;
+            target = g;
+            break;
+        }
+
+        ShowImpact(target != null ? (Vector2)target.transform.position + Vector2.up * 0.3f - dir * 0.2f : at, target != null);
+        if (target == null) { Debug.Log("Punch - missed."); return; }
+
+        AudioManager.PlayPunch();
+        target.TakeDamage(fistDamage, NPCDialogue.KillWeapon.Fists);
+        Debug.Log("Punch hit " + target.name + "!");
+    }
+
+    void ShowImpact(Vector2 pos, bool landed)
+    {
+        if (impactSprite == null) impactSprite = GroundGlint.StarSprite();
+        var go = new GameObject("Punch Impact");
+        go.transform.position = pos;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = impactSprite;
+        sr.sortingOrder = 50;
+        sr.color = landed ? new Color(1f, 0.95f, 0.8f, 1f) : new Color(1f, 1f, 1f, 0.45f);
+        StartCoroutine(FadeImpact(go.transform, sr, landed ? 0.9f : 0.5f));
+    }
+
+    System.Collections.IEnumerator FadeImpact(Transform t, SpriteRenderer sr, float size)
+    {
+        const float life = 0.18f;
+        Color c = sr.color;
+        for (float f = 0f; f < life; f += Time.deltaTime)
+        {
+            float k = f / life;
+            t.localScale = Vector3.one * size * (0.6f + 0.6f * k);
+            sr.color = new Color(c.r, c.g, c.b, c.a * (1f - k));
+            yield return null;
+        }
+        Destroy(t.gameObject);
     }
 
     // C - OPEN / CLOSE INVENTORY
