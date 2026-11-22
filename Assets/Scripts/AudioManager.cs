@@ -8,6 +8,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("---------- Audio Clip ----------")]
     public AudioClip Death_by_npc;
+    public AudioClip drowning_for_the_ending;
     public AudioClip Footsteps;
     public AudioClip Grandma_fight_song;
     public AudioClip Killed_at_lake_ending;
