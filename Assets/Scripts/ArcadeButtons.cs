@@ -9,6 +9,7 @@ public class ArcadeButtons : MonoBehaviour
     public InputActionReference buttonC;
 
     private PlayerInventory inventory;
+    private PlayerHealth health;
 
     void Awake()
     {
@@ -39,6 +40,12 @@ public class ArcadeButtons : MonoBehaviour
 
         // Frozen while a conversation is on screen: no picking up, attacking or inventory.
         if (DialogueManager.InputBlocked || DialogueDirector.Freezing)
+            return;
+
+        // Nothing to do once he's dead (game over).
+        if (health == null) health = GetComponentInParent<PlayerHealth>();
+        if (health == null) health = FindAnyObjectByType<PlayerHealth>();
+        if (health != null && health.IsDead)
             return;
 
         // A - PICK UP / SWITCH

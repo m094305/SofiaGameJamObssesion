@@ -14,8 +14,14 @@ public class NPCDialogue : MonoBehaviour
     public GameObject portrait;
     [Tooltip("What Narcissus takes from this NPC when it dies (changes his portrait).")]
     public DialogueDirector.Item stolenItems;
-    [Tooltip("Optional: plays instead of the plain death text when killed by a thrown item without being seen.")]
+    public enum KillWeapon { Thrown, Melee }
+
+    [Tooltip("Optional: plays instead of the plain death text when killed without being seen, by the weapon below.")]
     public DeathCutscene deathCutscene;
+    [Tooltip("Which kind of unseen kill plays the cutscene (knight: Thrown stone, merchant: Melee knife).")]
+    public KillWeapon cutsceneWeapon = KillWeapon.Thrown;
+    [Tooltip("Switched on when this NPC dies (e.g. the stone appears once the merchant is dead).")]
+    public GameObject[] revealOnDeath;
 
     [Header("When it starts")]
     [Tooltip("Narcissus notices the NPC within this distance (needs a clear line of sight).")]
@@ -30,6 +36,15 @@ public class NPCDialogue : MonoBehaviour
     public List<DialogueLine> deathLines = new List<DialogueLine>();
 
     public bool WasAttacked { get; private set; }
+
+    public bool HasDeathCutscene => deathCutscene != null;
+
+    // Unseen, and with the weapon this NPC's cutscene is made for.
+    public bool IsCutsceneKill(bool stealth, bool fromThrow)
+    {
+        bool rightWeapon = fromThrow == (cutsceneWeapon == KillWeapon.Thrown);
+        return stealth && rightWeapon && deathCutscene != null;
+    }
 
     bool spotted, greeted, attackedPlayed, deathPlayed;
     NPCGuard guard;
@@ -60,7 +75,8 @@ public class NPCDialogue : MonoBehaviour
         }
 
         // The NPC only talks to you if it's close AND can actually see you.
-        if (!greeted && d <= talkRadius && guard != null && guard.CanSeePlayerNow())
+        // (Not once it has turned on you.)
+        if (!greeted && d <= talkRadius && guard != null && !guard.IsHostile && guard.CanSeePlayerNow())
         {
             greeted = true;
             spotted = true;
@@ -80,8 +96,9 @@ public class NPCDialogue : MonoBehaviour
     }
 
     // Called by GuardHealth right before the NPC is removed.
-    // stealthThrow: killed by a thrown item without being seen -> play the death cutscene if there is one.
-    public void OnKilled(bool stealthThrow = false)
+    // stealth: killed without being seen; fromThrow: by a thrown item (else melee).
+    // An unseen kill with this NPC's cutscene weapon plays its death cutscene.
+    public void OnKilled(bool stealth = false, bool fromThrow = false)
     {
         WasAttacked = true;
         DialogueDirector.Instance.CancelPending(transform);
@@ -89,7 +106,11 @@ public class NPCDialogue : MonoBehaviour
         deathPlayed = true;
         DialogueDirector.GiveItems(stolenItems);
 
-        if (stealthThrow && deathCutscene != null)
+        if (revealOnDeath != null)
+            foreach (GameObject go in revealOnDeath)
+                if (go != null) go.SetActive(true);
+
+        if (IsCutsceneKill(stealth, fromThrow))
             deathCutscene.Play(deathLines);      // the shots, with the death lines over the last one
         else
             Play(deathLines);

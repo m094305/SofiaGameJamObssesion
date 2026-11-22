@@ -20,7 +20,19 @@ public class MeleeWeapons : MonoBehaviour
     [Header("Collision")]
     public LayerMask wallLayer;
 
+    [Header("Single use")]
+    [Tooltip("Gone for good after it kills someone (the knife).")]
+    public bool singleUse = true;
+
     public bool IsSwinging { get; private set; }
+    // True once a single-use weapon has made its kill.
+    public bool Used { get; private set; }
+
+    void SetGlint(bool on)
+    {
+        GroundGlint g = meleeWeapon != null ? meleeWeapon.GetComponent<GroundGlint>() : null;
+        if (g != null) g.enabled = on;
+    }
 
     private float nextAttackTime = 0f;
 
@@ -32,7 +44,7 @@ public class MeleeWeapons : MonoBehaviour
 
     public bool CanPickup(Vector2 playerPosition, float range)
     {
-        if (meleeWeapon == null || IsSwinging)
+        if (meleeWeapon == null || IsSwinging || Used)
             return false;
 
         if (!meleeWeapon.gameObject.activeInHierarchy)
@@ -61,13 +73,14 @@ public class MeleeWeapons : MonoBehaviour
             return;
 
         meleeWeapon.gameObject.SetActive(false);
+        SetGlint(false);
 
         Debug.Log("Melee picked up!");
     }
 
     public void Drop(Vector2 position)
     {
-        if (meleeWeapon == null)
+        if (meleeWeapon == null || Used)
             return;
 
         meleeWeapon.position = new Vector3(
@@ -78,6 +91,7 @@ public class MeleeWeapons : MonoBehaviour
 
         meleeWeapon.rotation = Quaternion.identity;
         meleeWeapon.gameObject.SetActive(true);
+        SetGlint(true);
 
         Debug.Log("Melee dropped!");
     }
@@ -87,7 +101,7 @@ public class MeleeWeapons : MonoBehaviour
         if (meleeWeapon == null || player == null)
             return;
 
-        if (IsSwinging || Time.time < nextAttackTime)
+        if (IsSwinging || Used || Time.time < nextAttackTime)
             return;
 
         nextAttackTime = Time.time + attackCooldown;
@@ -198,7 +212,11 @@ public class MeleeWeapons : MonoBehaviour
                 continue;
 
             damagedGuards.Add(guard);
-            guard.TakeDamage(meleeDamage);
+            guard.TakeDamage(meleeDamage, false);
+
+            // The knife stays in the body: used up.
+            if (singleUse && guard.isDead)
+                Used = true;
 
             Debug.Log("Melee hit NPC!");
         }

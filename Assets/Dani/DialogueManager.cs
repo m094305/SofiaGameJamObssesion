@@ -44,9 +44,24 @@ public class DialogueManager : MonoBehaviour
     public static bool AnyDialogueActive => Instance != null && Instance.isDialogueActive;
 
     // The button that closes the last line shouldn't also attack/interact that same frame.
+    // (Only the 0-1 frames right after it: with domain reload off this static survives into the
+    // next Play session, where the frame count restarts and a stale value would block input.)
     private static int lastEndedFrame = -10;
-    public static bool InputBlocked =>
-        AnyDialogueActive || UnityEngine.Time.frameCount - lastEndedFrame <= 1;
+    public static bool InputBlocked
+    {
+        get
+        {
+            if (AnyDialogueActive) return true;
+            int since = UnityEngine.Time.frameCount - lastEndedFrame;
+            return since >= 0 && since <= 1;
+        }
+    }
+
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        lastEndedFrame = -10;
+    }
 
     private void Awake()
     {

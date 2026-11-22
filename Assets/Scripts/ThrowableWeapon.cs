@@ -18,7 +18,19 @@ public class ThrowableWeapons : MonoBehaviour
     [Header("Collision")]
     public LayerMask wallLayer;
 
+    [Header("Single use")]
+    [Tooltip("Gone for good after it kills someone (the stone).")]
+    public bool singleUse = true;
+
     public bool IsFlying { get; private set; }
+    // True once a single-use weapon has made its kill.
+    public bool Used { get; private set; }
+
+    void SetGlint(bool on)
+    {
+        GroundGlint g = throwableItem != null ? throwableItem.GetComponent<GroundGlint>() : null;
+        if (g != null) g.enabled = on;
+    }
 
     void Awake()
     {
@@ -28,7 +40,7 @@ public class ThrowableWeapons : MonoBehaviour
 
     public bool CanPickup(Vector2 playerPosition, float range)
     {
-        if (throwableItem == null || IsFlying)
+        if (throwableItem == null || IsFlying || Used)
             return false;
 
         if (!throwableItem.gameObject.activeInHierarchy)
@@ -57,6 +69,7 @@ public class ThrowableWeapons : MonoBehaviour
             return;
 
         throwableItem.gameObject.SetActive(false);
+        SetGlint(false);
 
         Debug.Log("Throwable picked up!");
     }
@@ -74,6 +87,7 @@ public class ThrowableWeapons : MonoBehaviour
 
         throwableItem.rotation = Quaternion.identity;
         throwableItem.gameObject.SetActive(true);
+        SetGlint(!IsFlying);
     }
 
     public bool Throw(Vector2 start, Vector2 direction)
@@ -96,6 +110,7 @@ public class ThrowableWeapons : MonoBehaviour
 
         Vector2 position = start;
         float traveled = 0f;
+        bool hitSomeone = false;
 
         Drop(start);
 
@@ -171,8 +186,16 @@ public class ThrowableWeapons : MonoBehaviour
 
                 if (hitGuard != null)
                 {
+                    hitSomeone = true;
                     hitGuard.TakeDamage(throwDamage, true);
                     Debug.Log("Throwable hit NPC!");
+
+                    // It made its kill: gone for good.
+                    if (singleUse && hitGuard.isDead)
+                    {
+                        Used = true;
+                        throwableItem.gameObject.SetActive(false);
+                    }
                 }
                 else if (hitWall != null)
                 {
@@ -195,6 +218,11 @@ public class ThrowableWeapons : MonoBehaviour
         }
 
         IsFlying = false;
+        if (!Used) SetGlint(true);   // lying on the ground again
+
+        // A miss clatters to the ground: NPCs nearby get suspicious and look over.
+        if (!hitSomeone)
+            NPCGuard.MakeNoise(position);
 
         Debug.Log("Throwable landed. It can be picked up again!");
     }

@@ -27,6 +27,30 @@ public class DeathCutscene : MonoBehaviour
         public float zoomTo = 1.1f;
         [Tooltip("Height of the zoom's centre point in the image (0 = bottom, 1 = top), e.g. where the hit lands.")]
         [Range(0f, 1f)] public float zoomCentreY = 0.5f;
+        [Tooltip("On: zoom fast at first and settle. Off: smooth and steady (good for walking up to something).")]
+        public bool zoomEaseOut = true;
+
+        [Header("Walking overlay (optional, e.g. the knife hand)")]
+        [Tooltip("Drawn on top of the shot, same size as it (a full-frame image with transparency).")]
+        public Sprite overlay;
+        [Tooltip("Where the overlay's subject is in the image (0-1); it scales around this point.")]
+        public Vector2 overlayPivot = new Vector2(0.5f, 0.5f);
+        [Tooltip("Where it starts, offset from where it's drawn in the image (fraction of the image size).")]
+        public Vector2 overlayStart = Vector2.zero;
+        [Tooltip("How far it travels over the shot from that start, as a fraction of the image size.")]
+        public Vector2 overlayMove = Vector2.zero;
+        [Tooltip("Its scale at the end of the shot (bigger = it comes closer).")]
+        public float overlayScaleTo = 1f;
+        [Tooltip("Footsteps over the shot (each one bobs the overlay).")]
+        public int walkSteps = 6;
+        [Tooltip("How high each step bobs, as a fraction of the image height.")]
+        public float walkBob = 0.02f;
+        [Tooltip("Side-to-side tilt per step, in degrees.")]
+        public float walkSway = 3f;
+
+        [Header("Cut")]
+        [Tooltip("End this shot with a white flash straight into the next one (instead of fading to black).")]
+        public bool flashOut;
     }
 
     [Header("Shots (played in order)")]
@@ -39,6 +63,8 @@ public class DeathCutscene : MonoBehaviour
     public bool flashOnStart = true;
     public Color flashColor = Color.white;
     public float flashTime = 0.5f;
+    [Tooltip("How fast the screen goes white on a flash cut.")]
+    public float flashRise = 0.08f;
 
     [Header("UI (built under the Canvas)")]
     public GameObject screen;          // black backdrop + shot, hidden when not playing
@@ -85,9 +111,10 @@ public class DeathCutscene : MonoBehaviour
             float t = 0f;
             Zoom(0f);
 
-            if (i == 0 && flashOnStart)
+            bool flashIn = i == 0 ? flashOnStart : shots[i - 1].flashOut;
+            if (flashIn)
             {
-                // The hit lands: flash, and the first shot appears out of it (already zooming).
+                // The hit lands: flash, and the shot appears out of it (already zooming).
                 SetFadeColor(flashColor);
                 SetFade(1f);
                 for (float f = 0f; f < flashTime; f += Time.deltaTime)
@@ -127,14 +154,28 @@ public class DeathCutscene : MonoBehaviour
                 { t += Time.deltaTime; Zoom(t); yield return null; }
             }
 
-            // shot -> black
-            for (float f = 0f; f < fadeTime; f += Time.deltaTime)
+            if (current.flashOut && !last)
             {
-                t += Time.deltaTime; Zoom(t); SetFade(f / fadeTime);
-                yield return null;
+                // shot -> white flash (the next shot comes out of it)
+                SetFadeColor(flashColor);
+                for (float f = 0f; f < flashRise; f += Time.deltaTime)
+                {
+                    t += Time.deltaTime; Zoom(t); SetFade(f / flashRise);
+                    yield return null;
+                }
+            }
+            else
+            {
+                // shot -> black
+                for (float f = 0f; f < fadeTime; f += Time.deltaTime)
+                {
+                    t += Time.deltaTime; Zoom(t); SetFade(f / fadeTime);
+                    yield return null;
+                }
             }
             SetFade(1f);
         }
+        if (overlayImage != null) overlayImage.gameObject.SetActive(false);
 
         screen.SetActive(false);
         yield return Fade(1f, 0f);                       // black -> game
@@ -155,18 +196,66 @@ public class DeathCutscene : MonoBehaviour
         shotRect.anchoredPosition = Vector2.zero;
         shotRect.sizeDelta = new Vector2(shotRect.sizeDelta.x, 0f);
         shotRect.localScale = Vector3.one;
+
+        // The walking overlay sits exactly on top of the shot and moves with its zoom.
+        if (s.overlay != null)
+        {
+            if (overlayImage == null)
+            {
+                var go = new GameObject("Overlay", typeof(RectTransform));
+                go.transform.SetParent(shotRect, false);
+                overlayImage = go.AddComponent<Image>();
+                overlayImage.raycastTarget = false;
+            }
+            overlayImage.gameObject.SetActive(true);
+            overlayImage.sprite = s.overlay;
+            RectTransform rt = overlayImage.rectTransform;
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.pivot = s.overlayPivot;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            rt.localScale = Vector3.one;
+            rt.localRotation = Quaternion.identity;
+        }
+        else if (overlayImage != null)
+        {
+            overlayImage.gameObject.SetActive(false);
+        }
     }
 
     Shot current;
+    Image overlayImage;
+
+    // Walk the overlay towards its target: travels with ease-in-out, bobs once per step,
+    // and grows faster near the end as it closes in.
+    void MoveOverlay(float t)
+    {
+        if (current == null || current.overlay == null || overlayImage == null) return;
+        float walkTime = Mathf.Max(0.01f, shotDuration - fadeTime);
+        float p = Mathf.Clamp01(t / walkTime);
+        float travel = p * p * (3f - 2f * p);
+        float stepPhase = p * Mathf.Max(1, current.walkSteps) * Mathf.PI;
+        float bob = Mathf.Abs(Mathf.Sin(stepPhase)) * current.walkBob;
+
+        RectTransform rt = overlayImage.rectTransform;
+        Vector2 size = shotRect.rect.size;
+        Vector2 offset = current.overlayStart + current.overlayMove * travel + new Vector2(0f, bob);
+        rt.anchoredPosition = new Vector2(offset.x * size.x, offset.y * size.y);
+        float s = Mathf.Lerp(1f, current.overlayScaleTo, travel);
+        rt.localScale = new Vector3(s, s, 1f);
+        rt.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(stepPhase) * current.walkSway);
+    }
 
     // Moves from zoomFrom to zoomTo over the shot, easing out (fast at first, settling at the end).
     void Zoom(float t)
     {
         if (current == null) return;
         float k = Mathf.Clamp01(t / Mathf.Max(0.01f, shotDuration));
-        float eased = 1f - (1f - k) * (1f - k) * (1f - k);
+        float eased = current.zoomEaseOut
+            ? 1f - (1f - k) * (1f - k) * (1f - k)
+            : k * k * (3f - 2f * k);
         float s = Mathf.Lerp(current.zoomFrom, current.zoomTo, eased);
         shotRect.localScale = new Vector3(s, s, 1f);
+        MoveOverlay(t);
     }
 
     void SetFadeColor(Color c)

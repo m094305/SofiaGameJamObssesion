@@ -57,6 +57,10 @@ public class PlayerInventory : MonoBehaviour
         if (player == null)
             return;
 
+        // A single-use knife that made its kill is gone from the hand.
+        if (equippedWeapon == WeaponType.Melee && meleeWeapons != null && meleeWeapons.Used)
+            equippedWeapon = WeaponType.None;
+
         Vector2 currentPosition = player.position;
         Vector2 movement = currentPosition - previousPosition;
 
@@ -79,6 +83,10 @@ public class PlayerInventory : MonoBehaviour
             return;
 
         Vector2 position = player.position;
+
+        // Little things (the flower) go straight into the inventory, hands stay as they are.
+        if (Collectible.TryCollectNear(position, pickupRange * 0.6f))
+            return;
 
         bool canPickupRanged =
             throwableWeapons != null &&

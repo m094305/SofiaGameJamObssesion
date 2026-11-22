@@ -27,6 +27,7 @@ public class InventoryView : MonoBehaviour
 
     PlayerInventory inventory;
     DialogueDirector.Item shownItems = (DialogueDirector.Item)(-1);
+    int shownCollected = -1;
     PlayerInventory.WeaponType shownWeapon = (PlayerInventory.WeaponType)(-1);
 
     void Awake()
@@ -54,9 +55,10 @@ public class InventoryView : MonoBehaviour
         if (!open) return;
 
         DialogueDirector.Item items = DialogueDirector.Stolen;
-        if (items != shownItems)
+        if (items != shownItems || Collectible.Collected.Count != shownCollected)
         {
             shownItems = items;
+            shownCollected = Collectible.Collected.Count;
             if (portrait != null) portrait.sprite = SpriteFor(items);
             if (possessionsText != null) possessionsText.text = Describe(items);
         }
@@ -67,7 +69,7 @@ public class InventoryView : MonoBehaviour
             if (weaponText != null)
                 weaponText.text = "In hand: " + (shownWeapon == PlayerInventory.WeaponType.None
                     ? "nothing"
-                    : shownWeapon == PlayerInventory.WeaponType.Melee ? "melee weapon" : "throwable");
+                    : shownWeapon == PlayerInventory.WeaponType.Melee ? "a knife" : "a stone");
         }
     }
 
@@ -92,6 +94,7 @@ public class InventoryView : MonoBehaviour
         if ((i & DialogueDirector.Item.Scarf) != 0) lines.Add("- Purple silk, from the merchant");
         if ((i & DialogueDirector.Item.Cross) != 0) lines.Add("- Golden cross, from the knight");
         if ((i & DialogueDirector.Item.Rings) != 0) lines.Add("- Rings, from the old woman");
+        lines.AddRange(Collectible.Collected);
         return lines.Count == 0
             ? "Nothing yet worthy of Me."
             : string.Join("\n", lines);

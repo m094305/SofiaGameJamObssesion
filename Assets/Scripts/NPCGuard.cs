@@ -71,6 +71,73 @@ public class NPCGuard : MonoBehaviour
     public bool showSeesYouIcon = true;
     public float seesYouIconHeight = 1.0f;
 
+    [Header("Suspicion")]
+    [Tooltip("The NPC turns on you once it has spotted you MORE than this many times.")]
+    public int sightingsBeforeHostile = 3;
+    [Tooltip("You must be out of its sight this long before being seen again counts as a new sighting.")]
+    public float sightingCooldown = 2f;
+    [Tooltip("A thrown item landing within this distance (a miss) makes the NPC suspicious.")]
+    public float noiseRadius = 4f;
+    [Tooltip("How much a nearby miss adds to its suspicion (counts like a sighting).")]
+    public int noiseSuspicion = 1;
+    [Tooltip("How long it stops and stares at where the noise came from.")]
+    public float investigateTime = 2.5f;
+
+    // How many times it has spotted you (plus noises). Above sightingsBeforeHostile -> hostile.
+    public int Suspicion { get; private set; }
+    public bool IsHostile => isHostile;
+
+    private bool sawPlayer;
+    private float lastLostSightTime = -100f;
+    private float investigateUntil;
+    private Vector2 investigatePoint;
+    private NPCSpriteAnimator spriteAnim;
+
+    // Every NPC near a missed throw hears it.
+    public static void MakeNoise(Vector2 at)
+    {
+        foreach (NPCGuard g in FindObjectsByType<NPCGuard>())
+            if (g.isActiveAndEnabled && Vector2.Distance(g.rb.position, at) <= g.noiseRadius)
+                g.HearNoise(at);
+    }
+
+    public void HearNoise(Vector2 at)
+    {
+        if (isHostile) return;
+        investigatePoint = at;
+        investigateUntil = Time.time + investigateTime;
+        AddSuspicion(noiseSuspicion, "heard something");
+    }
+
+    void AddSuspicion(int amount, string why)
+    {
+        if (isHostile || amount <= 0) return;
+        Suspicion += amount;
+        Debug.Log(name + ": " + why + " (suspicion " + Suspicion + "/" + sightingsBeforeHostile + ")");
+        if (Suspicion > sightingsBeforeHostile)
+            BecomeHostile();
+    }
+
+    // Counts each fresh sighting (seen again after being out of sight for a while).
+    void TrackSightings()
+    {
+        if (isHostile || DialogueManager.AnyDialogueActive || DialogueDirector.Freezing || DeathCutscene.Playing)
+            return;
+
+        bool sees = CanSeePlayerNow();
+        if (sees && !sawPlayer)
+        {
+            if (Time.time - lastLostSightTime >= sightingCooldown || Suspicion == 0)
+                AddSuspicion(1, "spotted you");
+            // Seeing you again straight after counts as the same sighting.
+        }
+        else if (!sees && sawPlayer)
+        {
+            lastLostSightTime = Time.time;
+        }
+        sawPlayer = sees;
+    }
+
     private Rigidbody2D rb;
     private PlayerHealth playerHealth;
     private Collider2D playerCollider;
@@ -117,6 +184,8 @@ public class NPCGuard : MonoBehaviour
 
         if (showSeesYouIcon)
             CreateSeesYouIcon();
+
+        spriteAnim = GetComponentInChildren<NPCSpriteAnimator>(true);
     }
 
     // ---- "!" over the head while this NPC can see the player ----
@@ -141,16 +210,34 @@ public class NPCGuard : MonoBehaviour
         seesYouIcon.SetActive(false);
     }
 
+    // While it sees you: "?" getting more orange with each sighting, red "!" once hostile.
+    // A "?" also shows while it's staring at a noise.
     void UpdateSeesYouIcon()
     {
         if (seesYouIcon == null) return;
-        bool sees = CanSeePlayerNow();
-        if (seesYouIcon.activeSelf != sees)
-            seesYouIcon.SetActive(sees);
+        bool investigating = !isHostile && Time.time < investigateUntil;
+        bool show = CanSeePlayerNow() || investigating;
+        if (seesYouIcon.activeSelf != show)
+            seesYouIcon.SetActive(show);
+        if (!show) return;
+
+        var text = seesYouIcon.GetComponent<TMPro.TextMeshPro>();
+        if (isHostile)
+        {
+            text.text = "!";
+            text.color = new Color(1f, 0.25f, 0.2f);
+        }
+        else
+        {
+            text.text = "?";
+            float k = sightingsBeforeHostile > 0 ? Mathf.Clamp01(Suspicion / (float)sightingsBeforeHostile) : 1f;
+            text.color = Color.Lerp(new Color(1f, 0.95f, 0.4f), new Color(1f, 0.5f, 0.15f), k);
+        }
     }
 
     void Update()
     {
+        TrackSightings();
         UpdateSeesYouIcon();
 
         if (!CanInteract())
@@ -180,9 +267,19 @@ public class NPCGuard : MonoBehaviour
         }
         inDialogue = false;
 
-        // A peaceful NPC only patrols; spotting the player does not start combat.
+        // A peaceful NPC patrols; it only turns on you after being suspicious too often.
         if (!isHostile)
         {
+            if (Time.time < investigateUntil)
+            {
+                // Stop and stare at where the noise came from.
+                rb.linearVelocity = Vector2.zero;
+                Vector2 look = investigatePoint - rb.position;
+                FaceDirection(look);
+                if (spriteAnim != null) spriteAnim.Face(look);
+                stuckCheckTime = Time.time;
+                return;
+            }
             Patrol();
             return;
         }
@@ -486,7 +583,8 @@ public class NPCGuard : MonoBehaviour
         isHostile = true;
         chasing = true;
         lastSeenTime = Time.time;
-        Debug.Log(name + ": Attacked! Now hostile.");
+        investigateUntil = 0f;
+        Debug.Log(name + ": Now hostile.");
     }
 
     void TryPunch()
@@ -505,7 +603,7 @@ public class NPCGuard : MonoBehaviour
 
         nextPunchTime = Time.time + punchDelay;
         playerHealth.TakeDamage(punchDamage);
-        Debug.Log(name + ": PUNCH! -" + punchDamage + " HP");
+        Debug.Log(name + ": PUNCH! (-1 heart)");
     }
 
     bool CanInteract()
