@@ -55,7 +55,7 @@ public class PlayerHealth : MonoBehaviour
     }
 
     [Header("Game over")]
-    [Tooltip("Seconds after dying before \"Press A to try again\" appears and works.")]
+    [Tooltip("Seconds after dying before \"Press Space to try again\" appears and works.")]
     public float retryDelay = 1.5f;
 
     bool CanRetry => IsDead && Time.time - diedAt >= retryDelay;
@@ -154,36 +154,10 @@ public class PlayerHealth : MonoBehaviour
                 if (retryStyle == null)
                     retryStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, fontStyle = FontStyle.Bold };
                 retryStyle.fontSize = Mathf.RoundToInt(26f * sc);
-                string before = "Press", after = "to try again";
-                float wb = retryStyle.CalcSize(new GUIContent(before)).x;
-                float wa = retryStyle.CalcSize(new GUIContent(after)).x;
-                float d = 32f * sc, gap = 10f * sc;
-                float total = wb + gap + d + gap + wa;
-                float x = Screen.width * 0.5f - total * 0.5f;
-                float y = Screen.height * 0.5f + 115f * sc;
-                Rect rb = new Rect(x, y - 16f * sc, wb, 32f * sc);
-                Rect ra = new Rect(x + wb + gap + d + gap, y - 16f * sc, wa, 32f * sc);
-                retryStyle.normal.textColor = new Color(0f, 0f, 0f, 0.85f * pa);
-                GUI.Label(new Rect(rb.x + 2f * sc, rb.y + 2f * sc, rb.width, rb.height), before, retryStyle);
-                GUI.Label(new Rect(ra.x + 2f * sc, ra.y + 2f * sc, ra.width, ra.height), after, retryStyle);
-                retryStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f, pa);
-                GUI.Label(rb, before, retryStyle);
-                GUI.Label(ra, after, retryStyle);
-
-                // The red A button.
-                if (buttonCircle == null) buttonCircle = MakeCircle();
-                Color bc = new Color(0.86f, 0.22f, 0.22f);
-                Rect b = new Rect(x + wb + gap, y - d * 0.5f, d, d);
-                GUI.color = new Color(0f, 0f, 0f, 0.6f * pa);
-                GUI.DrawTexture(new Rect(b.x + 2f * sc, b.y + 2.5f * sc, d, d), buttonCircle);
-                GUI.color = new Color(bc.r * 0.6f, bc.g * 0.6f, bc.b * 0.6f, pa);
-                GUI.DrawTexture(b, buttonCircle);
-                GUI.color = new Color(bc.r, bc.g, bc.b, pa);
-                GUI.DrawTexture(new Rect(b.x + 2.5f * sc, b.y + 2f * sc, d - 5f * sc, d - 6f * sc), buttonCircle);
-                GUI.color = Color.white;
-                var bs = new GUIStyle(retryStyle) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.RoundToInt(19f * sc) };
-                bs.normal.textColor = new Color(1f, 1f, 1f, pa);
-                GUI.Label(new Rect(b.x, b.y - 1f * sc, d, d), "A", bs);
+                retryStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f, 1f);
+                // "Press [Space] to try again" (any key works).
+                KeyCap.DrawPrompt("Press", KeyCap.Attack, "to try again",
+                                  Screen.width * 0.5f, Screen.height * 0.5f + 115f * sc, retryStyle, sc, sc * 1.1f, pa);
             }
             GUI.color = old;
         }

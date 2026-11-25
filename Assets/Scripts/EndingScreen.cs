@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// After the ending's pictures: "Envy's Flower" and "The End" on black, then "Press A" back to the title.
+// After the ending's pictures: "Envy's Flower" and "The End" on black, then "Press Space" back to the title.
 public class EndingScreen : MonoBehaviour
 {
     public DeathCutscene cutscene;
@@ -58,23 +58,9 @@ public class EndingScreen : MonoBehaviour
         {
             float pa = Mathf.Clamp01((t - 4f) / 0.6f) * (0.6f + 0.4f * (0.5f + 0.5f * Mathf.Sin(t * 3f)));
             promptStyle.fontSize = Mathf.RoundToInt(24f * s);
-            string before = "Press", after = "to return to the title";
-            float wb = promptStyle.CalcSize(new GUIContent(before)).x, wa = promptStyle.CalcSize(new GUIContent(after)).x;
-            float d = 30f * s, gap = 10f * s, total = wb + gap + d + gap + wa;
-            float x = Screen.width * 0.5f - total * 0.5f, y = Screen.height * 0.78f;
-            promptStyle.normal.textColor = new Color(0.9f, 0.88f, 0.82f, pa);
-            GUI.Label(new Rect(x, y - 15f * s, wb, 30f * s), before, promptStyle);
-            GUI.Label(new Rect(x + wb + gap + d + gap, y - 15f * s, wa, 30f * s), after, promptStyle);
-            Color bc = new Color(0.86f, 0.22f, 0.22f);
-            Rect b = new Rect(x + wb + gap, y - d * 0.5f, d, d);
-            GUI.color = new Color(bc.r * 0.6f, bc.g * 0.6f, bc.b * 0.6f, pa);
-            GUI.DrawTexture(b, circle);
-            GUI.color = new Color(bc.r, bc.g, bc.b, pa);
-            GUI.DrawTexture(new Rect(b.x + 2.5f * s, b.y + 2f * s, d - 5f * s, d - 6f * s), circle);
-            GUI.color = Color.white;
-            buttonStyle.fontSize = Mathf.RoundToInt(18f * s);
-            buttonStyle.normal.textColor = new Color(1f, 1f, 1f, pa);
-            GUI.Label(new Rect(b.x, b.y - 1f * s, d, d), "A", buttonStyle);
+            promptStyle.normal.textColor = new Color(0.9f, 0.88f, 0.82f, 1f);
+            KeyCap.DrawPrompt("Press", KeyCap.Attack, "to return to the title",
+                              Screen.width * 0.5f, Screen.height * 0.78f, promptStyle, s, s, pa);
         }
         GUI.color = old;
     }

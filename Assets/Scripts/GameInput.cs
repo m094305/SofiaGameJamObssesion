@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 //     trigger (button 1) = Attack / throw  - also advances dialogue
 //     button 2           = Pick up         - also "interact" (NPCs, the lake)
 //     button 3           = Inventory
-//   Keyboard: WASD move, J pick up / interact, K attack, I inventory, E interact + advance dialogue
+//   Keyboard: WASD / arrows move, E pick up / interact (lake, NPCs), Space attack + next line,
+//             Tab or I inventory, Enter also advances dialogue
 //   Gamepad:  left stick / d-pad, X(West) pick up, A(South) attack, Y(North) inventory
 //
 // The pick up / attack / inventory buttons themselves live in ArcadeControlls.inputactions.
@@ -14,22 +15,22 @@ public static class GameInput
 {
     public static readonly string[] AdvanceDialogueBindings =
     {
-        "<Keyboard>/e", "<Keyboard>/k", "<Keyboard>/space", "<Keyboard>/enter",
+        "<Keyboard>/e", "<Keyboard>/space", "<Keyboard>/enter",
         "<Joystick>/trigger", "<Gamepad>/buttonSouth",
     };
 
     public static readonly string[] InteractBindings =
     {
-        "<Keyboard>/e", "<Keyboard>/j",
+        "<Keyboard>/e",
         "<Joystick>/button2", "<Gamepad>/buttonWest",
     };
 
     static InputAction interact;
 
-    // The A button (arcade trigger / K / gamepad A) plus E: uses the lake.
+    // Uses the lake: E or Space on the keyboard, the arcade trigger, gamepad A.
     public static readonly string[] LakeBindings =
     {
-        "<Joystick>/trigger", "<Keyboard>/k", "<Gamepad>/buttonSouth", "<Keyboard>/e",
+        "<Joystick>/trigger", "<Keyboard>/space", "<Gamepad>/buttonSouth", "<Keyboard>/e",
     };
     static InputAction lake;
 

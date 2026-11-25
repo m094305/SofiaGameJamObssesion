@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.SceneManagement;
 
-// Restarting the level after GAME OVER ("Press A to try again").
+// Restarting the level after GAME OVER ("Press Space to try again").
 // Reloads the scene and re-runs the things that normally only set themselves up at game launch
 // (forest colliders/bushes, button hints, title screen). A retry skips the title screen.
 public static class GameFlow

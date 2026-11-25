@@ -63,7 +63,7 @@
                 {
                     "name": "",
                     "id": "4c1f6b0e-2a1d-4e55-9a31-1f0e8d2b7a02",
-                    "path": "<Keyboard>/j",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -96,7 +96,7 @@
                 {
                     "name": "",
                     "id": "4c1f6b0e-2a1d-4e55-9a31-1f0e8d2b7a04",
-                    "path": "<Keyboard>/k",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -141,6 +141,17 @@
                     "name": "",
                     "id": "4c1f6b0e-2a1d-4e55-9a31-1f0e8d2b7a07",
                     "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7d2a9c41-5b3e-4f86-8c12-6e4b1a9f3d58",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

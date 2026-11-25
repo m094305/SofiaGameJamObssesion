@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Start menu: "Envy's Flower" over the darkened forest, "Press A to start".
+// Start menu: "Envy's Flower" over the darkened forest, "Press Space to start".
 // The world is held still (like a cutscene) until a button is pressed, then the overlay fades away
 // and the music moves from the opening song to the main theme.
 // Added automatically when a level loads, so every scene gets it without setup.
 public class TitleScreen : MonoBehaviour
 {
     public string title = "Envy's Flower";
-    public string prompt = "Press       to start";   // the gap holds the A button
-    public string buttonLabel = "A";
-    public Color buttonColor = new Color(0.86f, 0.22f, 0.22f);
+    // "Press [key] to start" (any key starts; this is the one shown).
+    public string buttonLabel = KeyCap.Attack;
     public Color titleColor = new Color(0.93f, 0.86f, 0.62f);
     public float fadeOutTime = 1.2f;
 
@@ -130,34 +129,14 @@ public class TitleScreen : MonoBehaviour
         GUI.color = new Color(1f, 0.92f, 0.7f, ta);
         GUI.DrawTexture(new Rect(cx - st * 0.5f, cy + 71f * s - st * 0.5f, st, st), star);
 
-        // "Press A to start", pulsing (steady once pressed).
+        // "Press Space to start", pulsing (steady once pressed).
         float pa = a * Mathf.Clamp01((t - 1.4f) / 0.6f);
         if (startedAt < 0f) pa *= 0.6f + 0.4f * (0.5f + 0.5f * Mathf.Sin(t * 3f));
         promptStyle.fontSize = Mathf.RoundToInt(30f * s);
-        Rect pr = new Rect(0, Screen.height * 0.72f, Screen.width, 50f * s);
-        promptStyle.normal.textColor = new Color(0f, 0f, 0f, 0.8f * pa);
-        GUI.color = Color.white;
-        GUI.Label(new Rect(pr.x + 2f * s, pr.y + 2f * s, pr.width, pr.height), prompt, promptStyle);
-        promptStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f, pa);
-        GUI.Label(pr, prompt, promptStyle);
-
-        // The A button, sitting in the gap in the prompt.
-        Vector2 full = promptStyle.CalcSize(new GUIContent(prompt));
-        Vector2 before = promptStyle.CalcSize(new GUIContent("Press "));
-        Vector2 gap = promptStyle.CalcSize(new GUIContent("      "));
-        float d = 36f * s;
-        float bx = cx - full.x * 0.5f + before.x + (gap.x - d) * 0.5f;
-        float by = pr.y + pr.height * 0.5f - d * 0.5f;
-        GUI.color = new Color(0f, 0f, 0f, 0.6f * pa);
-        GUI.DrawTexture(new Rect(bx + 2f * s, by + 2.5f * s, d, d), circle);
-        GUI.color = new Color(buttonColor.r * 0.6f, buttonColor.g * 0.6f, buttonColor.b * 0.6f, pa);
-        GUI.DrawTexture(new Rect(bx, by, d, d), circle);
-        GUI.color = new Color(buttonColor.r, buttonColor.g, buttonColor.b, pa);
-        GUI.DrawTexture(new Rect(bx + 3f * s, by + 2.5f * s, d - 6f * s, d - 7f * s), circle);
-        buttonStyle.fontSize = Mathf.RoundToInt(21f * s);
-        buttonStyle.normal.textColor = new Color(1f, 1f, 1f, pa);
-        GUI.color = Color.white;
-        GUI.Label(new Rect(bx, by - 1f * s, d, d), buttonLabel, buttonStyle);
+        promptStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f, 1f);
+        // "Press [Space] to start" - any key starts, Space is the one shown.
+        KeyCap.DrawPrompt("Press", buttonLabel, "to start", cx, Screen.height * 0.72f + 25f * s,
+                          promptStyle, s, s * 1.25f, pa);
 
         GUI.color = old;
     }

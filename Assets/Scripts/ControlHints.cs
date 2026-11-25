@@ -8,10 +8,10 @@ using UnityEngine;
 // Added to the player automatically, so it works in every scene without setup.
 public class ControlHints : MonoBehaviour
 {
-    [Header("Arcade buttons (as drawn on screen)")]
-    public string attackLabel = "A";      // trigger: attack / throw / punch, next line
-    public string pickupLabel = "B";      // pick up / swap / interact
-    public string inventoryLabel = "C";
+    [Header("Keys (as drawn on screen)")]
+    public string attackLabel = KeyCap.Attack;       // Space: attack / throw / punch, next line
+    public string pickupLabel = KeyCap.Pickup;       // E: pick up / swap, the lake
+    public string inventoryLabel = KeyCap.Inventory; // Tab
     public Color attackColor = new Color(0.86f, 0.22f, 0.22f);
     public Color pickupColor = new Color(0.25f, 0.5f, 0.92f);
     public Color inventoryColor = new Color(0.95f, 0.78f, 0.2f);
@@ -103,7 +103,7 @@ public class ControlHints : MonoBehaviour
             promptOn = true;
             promptWorld = lake != null ? lake.LakePosition : (Vector3)pos;
             promptText = "Look into the lake";
-            promptBtn = Btn.Attack;
+            promptBtn = Btn.Pickup;   // E
             return;
         }
 
@@ -238,8 +238,10 @@ public class ControlHints : MonoBehaviour
     {
         textStyle.fontSize = Mathf.RoundToInt(19f * s);
         float tw = textStyle.CalcSize(new GUIContent(r.text)).x;
-        return tw + (r.btn == Btn.None ? 0f : 34f * s);
+        return tw + (r.btn == Btn.None ? 0f : KeyCap.Width(LabelOf(r.btn), s) + 9f * s);
     }
+
+    string LabelOf(Btn b) => b == Btn.Attack ? attackLabel : b == Btn.Pickup ? pickupLabel : inventoryLabel;
 
     // centre = middle of the row.
     void DrawRow(Row r, Vector2 centre, float s, bool centred, float alpha)
@@ -248,22 +250,10 @@ public class ControlHints : MonoBehaviour
         labelStyle.fontSize = Mathf.RoundToInt(16f * s);
         float w = RowWidth(r, s);
         float x = centre.x - w * 0.5f;
-        float d = 26f * s;
-
         if (r.btn != Btn.None)
         {
-            Color c = r.btn == Btn.Attack ? attackColor : r.btn == Btn.Pickup ? pickupColor : inventoryColor;
-            string label = r.btn == Btn.Attack ? attackLabel : r.btn == Btn.Pickup ? pickupLabel : inventoryLabel;
-            Rect b = new Rect(x, centre.y - d * 0.5f, d, d);
-            GUI.color = new Color(0f, 0f, 0f, 0.6f * alpha);                       // shadow
-            GUI.DrawTexture(new Rect(b.x + 1.5f * s, b.y + 2f * s, d, d), circle);
-            GUI.color = new Color(c.r * 0.6f, c.g * 0.6f, c.b * 0.6f, alpha);      // rim
-            GUI.DrawTexture(b, circle);
-            GUI.color = new Color(c.r, c.g, c.b, alpha);                            // cap
-            GUI.DrawTexture(new Rect(b.x + 2.5f * s, b.y + 2f * s, d - 5f * s, d - 5.5f * s), circle);
-            GUI.color = new Color(1f, 1f, 1f, alpha);
-            GUI.Label(b, label, labelStyle);
-            x += 34f * s;
+            // The keyboard key to press, drawn as a key-cap.
+            x += KeyCap.Draw(x, centre.y, LabelOf(r.btn), s, alpha) + 9f * s;
         }
 
         Rect tr = new Rect(x, centre.y - 14f * s, w, 28f * s);

@@ -58,6 +58,7 @@ public class NPCDialogue : MonoBehaviour
     bool spotted, greeted, attackedPlayed, deathPlayed;
     NPCGuard guard;
     Transform player;
+    PlayerHealth playerHealth;
 
     void Awake()
     {
@@ -69,6 +70,11 @@ public class NPCDialogue : MonoBehaviour
     void Update()
     {
         if (player == null || WasAttacked)
+            return;
+
+        // Nobody greets or eyes a dead man (GAME OVER stays clear).
+        if (playerHealth == null) playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth != null && playerHealth.IsDead)
             return;
 
         // Only start something new when nothing is on screen or waiting.
